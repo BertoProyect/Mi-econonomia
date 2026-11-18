@@ -84,7 +84,7 @@ function s2(t,T){
   <div class="abs" style="left:0;right:0;bottom:56px;display:flex;justify-content:center"><span class="btn" style="height:68px;padding:0 34px;font-size:25px;font-weight:600;${st(toast,(1-toast)*20)}">Guardado · Café 4,50 €</span></div>`;
 }
 
-// ---------- Escena 3: el Bizum de tu amigo ----------
+// ---------- Escena 3: Bizum pendiente ----------
 function s3(t,T){
   const inc=E(t,1.25,1.9);                       // llega al pendiente
   const move=eio(p(t,3.1,4.2));                   // viaja al disponible
@@ -105,7 +105,7 @@ function s3(t,T){
   <div class="abs" style="left:370px;top:200px;width:310px;height:220px;border-radius:28px;background:#202326;padding:28px;${IN(t,.12,.6,16)};box-shadow:inset 0 0 0 2px rgba(245,165,36,${(.8*(inc*(1-move))).toFixed(3)})">
     <div class="muted" style="font-size:23px;font-weight:500">Pendiente</div>
     <div class="warn" style="font-size:44px;font-weight:600;margin-top:18px;letter-spacing:-.01em;white-space:nowrap">${eur(pend)}</div>
-    <div class="t2" style="margin-top:14px">En la cuenta de tu amigo</div></div>
+    <div class="t2" style="margin-top:14px">Por Bizum</div></div>
   <div class="abs" style="left:370px;top:446px;width:310px;${st(E(t,2.1,2.6)*(1-E(t,4.4,4.8)),(1-E(t,2.1,2.6))*14,press)}"><span class="btn" style="height:72px;font-size:25px">Me lo ha pasado</span></div>
   <span class="pill abs" style="left:${(cx-75).toFixed(1)}px;top:${(cy-32).toFixed(1)}px;background:#F5A524;color:#000;height:64px;opacity:${(t>3.1&&t<4.25?1:0)}">+200 €</span>
   <div class="abs" style="left:40px;right:40px;top:560px;text-align:center;font-size:25px;font-weight:500;${IN(t,4.3,.6,12)}"><span class="muted">El ingreso de Órbita cuenta </span>una sola vez</div>`;
