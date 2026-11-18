@@ -21,7 +21,7 @@ android-app/ + .github/workflows/android-apk.yml   APK opcional
 
 ## Lo que falta por hacer (tú)
 1. **Supabase → Authentication → Sign In / Providers → Email**: desactiva **Confirm email**. Si no, al crear la cuenta te llegará un correo con un enlace que no funciona.
-2. **Vercel** → Add New → Project → importa `BertoProyect/Mi-econonom-a` → **Deploy** (sin build ni ajustes). Te da tu URL.
+2. **Vercel** → Add New → Project → importa `BertoProyect/Mi-econonomia` → **Deploy** (sin build ni ajustes). Te da tu URL.
 3. Abre la URL → «Primera vez: crear cuenta» → tu email y contraseña.
 4. Vuelve a Supabase → **Authentication → Sign In / Providers** → desactiva **Allow new users to sign up**. Desde ahí nadie más puede registrarse. Aunque alguien entrara, las reglas impiden ver datos ajenos.
 5. En el OPPO: abre la URL en **Chrome**, entra y menú ⋮ → **Instalar aplicación**.
