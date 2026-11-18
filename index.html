@@ -243,7 +243,7 @@ textarea.input{resize:vertical;min-height:84px;padding:12px 14px;height:auto}
 .hbar-top .name{display:flex;align-items:center;gap:9px;min-width:0}
 .hbar-top .name span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .track{position:relative;height:6px;background:rgba(255,255,255,.07);border-radius:99px;margin-top:8px}
-.track .fill{position:absolute;left:0;top:0;bottom:0;border-radius:99px;transform-origin:left;animation:grow .7s var(--ease) both}
+.track .fill{position:absolute;left:0;top:0;bottom:0;border-radius:99px;transform-origin:left;transition:width .5s var(--ease)}
 .track .limit{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--text);opacity:.7;border-radius:2px}
 @keyframes grow{from{transform:scaleX(.001)}to{transform:none}}
 
@@ -504,6 +504,64 @@ body.onb-open{overflow:hidden}
 .enter-list>*{animation:rise .5s var(--ease) both}
 .enter-list>*:nth-child(2){animation-delay:.04s}.enter-list>*:nth-child(3){animation-delay:.08s}.enter-list>*:nth-child(4){animation-delay:.12s}.enter-list>*:nth-child(5){animation-delay:.16s}.enter-list>*:nth-child(n+6){animation-delay:.2s}
 @keyframes rise{from{opacity:.001;transform:translateY(8px)}to{opacity:1;transform:none}}
+/* ---------- Movimiento ----------
+   Regla: nada se anima solo porque cambie un dato. Se anima al entrar en una pantalla,
+   al pasar el cursor y al tocar. Todo vuelve a su sitio al quitar el cursor. */
+.ic{transition:transform .35s var(--ease);transform-origin:center}
+.ic *{transition:transform .35s var(--ease),opacity .35s var(--ease);transform-box:fill-box;transform-origin:center}
+@media (hover:hover){
+  :is(a,button,label,summary):hover>.ic:not(.chev),:is(a,button,label,summary):hover>span>.ic,:is(a,button,label,summary):hover>.c>.ic{transform:var(--ic-h,scale(1.08))}
+  .i-plus{--ic-h:rotate(90deg)} .i-x{--ic-h:rotate(90deg)} .i-gear{--ic-h:rotate(75deg);transition-duration:.6s}
+  .i-home{--ic-h:translateY(-2px)} .i-list{--ic-h:translateX(2px)} .i-target{--ic-h:scale(1.06)}
+  .i-left{--ic-h:translateX(-3px)} .i-right{--ic-h:translateX(3px)} .i-back{--ic-h:translateX(-3px)}
+  .i-upload{--ic-h:translateY(-2px)} .i-download{--ic-h:translateY(2px)} .i-swap{--ic-h:rotate(180deg)} .i-repeat{--ic-h:rotate(180deg)}
+  .i-camera{--ic-h:scale(1.1) rotate(-6deg)} .i-spark{--ic-h:scale(1.15) rotate(20deg)} .i-pencil{--ic-h:rotate(-14deg) translateY(-1px)}
+  .i-check{--ic-h:scale(1.15)} .i-search{--ic-h:scale(1.1) rotate(-8deg)} .i-chart{--ic-h:scaleY(1.15)} .i-wallet{--ic-h:rotate(-8deg)}
+  .i-play{--ic-h:translateX(2px) scale(1.08)} .i-filter{--ic-h:scaleX(.82)} .i-tag{--ic-h:rotate(-14deg)} .i-wand{--ic-h:rotate(-18deg)}
+  .i-db{--ic-h:translateY(-2px)} .i-phone{--ic-h:rotate(-10deg)} .i-user{--ic-h:translateY(-2px)} .i-sliders{--ic-h:scaleY(-1)} .i-grid{--ic-h:rotate(90deg)}
+  /* Menú lateral: cada icono hace algo suyo */
+  .nav a:hover .i-grid{transform:none} .nav a:hover .i-grid rect:nth-child(1){transform:translate(-1.5px,-1.5px)} .nav a:hover .i-grid rect:nth-child(2){transform:translate(1.5px,-1.5px)} .nav a:hover .i-grid rect:nth-child(3){transform:translate(-1.5px,1.5px)} .nav a:hover .i-grid rect:nth-child(4){transform:translate(1.5px,1.5px) rotate(45deg)}
+  .nav a:hover .i-target{transform:none} .nav a:hover .i-target circle:nth-child(1){transform:scale(1.12)} .nav a:hover .i-target circle:nth-child(2){transform:scale(.7)} .nav a:hover .i-target circle:nth-child(3){transform:scale(1.8)}
+  .nav a:hover .ic-wrap{background:var(--surface-2)} .nav a[aria-current="page"]:hover .ic-wrap{background:var(--accent)}
+  .side-add:hover,.fab:hover{transform:scale(1.06)}
+  .avatar:hover{transform:scale(1.06)} .round-btn:hover,.search:hover{background:var(--surface-2)}
+  .strip .cell:not(.on):hover{background:#1B1D20}
+  .chip:hover{transform:translateY(-1px)}
+}
+.nav a .ic-wrap{transition:background .3s var(--ease),transform .2s var(--ease)}
+.nav a:active .ic-wrap,.tabs a:active .ic{transform:scale(.88)}
+.side-add,.fab,.avatar,.round-btn,.search,.chip,.pen,.ck .box,.irow,.strip .cell{transition:transform .2s var(--ease),background .2s var(--ease),color .2s var(--ease),border-color .2s var(--ease)}
+.chip:active,.pen:active,.side-add:active,.round-btn:active{transform:scale(.92)}
+.irow:active{transform:scale(.99)} .ck:active .box{transform:scale(.88)}
+.ck.pop .box{animation:ckpop .4s var(--ease)}
+@keyframes ckpop{0%{transform:scale(.7)}60%{transform:scale(1.18)}100%{transform:none}}
+/* Bocadillo (botón + del lateral) */
+[data-tip]{position:relative}
+[data-tip]::after{content:attr(data-tip);position:absolute;left:calc(100% + 12px);top:50%;transform:translate(-6px,-50%);background:var(--text);color:#000;font-size:12.5px;font-weight:600;white-space:nowrap;padding:6px 10px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s var(--ease),transform .25s var(--ease);z-index:var(--z-toast)}
+[data-tip]::before{content:"";position:absolute;left:calc(100% + 7px);top:50%;width:10px;height:10px;background:var(--text);transform:translate(-6px,-50%) rotate(45deg);border-radius:2px;opacity:0;pointer-events:none;transition:opacity .2s var(--ease),transform .25s var(--ease)}
+[data-tip]:hover::after,[data-tip]:focus-visible::after{opacity:1;transform:translate(0,-50%)}
+[data-tip]:hover::before,[data-tip]:focus-visible::before{opacity:1;transform:translate(0,-50%) rotate(45deg)}
+/* Entrada al cambiar de pantalla */
+.rise{animation:rise .55s var(--ease) both}
+.route-in .track .fill{animation:grow .8s var(--ease) both;animation-delay:.15s}
+.route-in .chart .b-inc,.route-in .chart .b-exp{transform-box:fill-box;transform-origin:bottom;animation:growY .7s var(--ease) both}
+.route-in .chart .net-l{stroke-dasharray:2000;stroke-dashoffset:2000;animation:dash 1.2s .2s var(--ease) forwards}
+.route-in .ln{stroke-dasharray:1;stroke-dashoffset:1;animation:dash1 1.1s .1s var(--ease) forwards}
+.route-in .bigmoney{animation:rise .6s var(--ease) both}
+@keyframes growY{from{transform:scaleY(.001)}to{transform:none}}
+@keyframes dash{to{stroke-dashoffset:0}}
+@keyframes dash1{to{stroke-dashoffset:0}}
+/* Salidas */
+.overlay.leave{animation:fadeOut .2s var(--ease) forwards;pointer-events:none}
+.overlay.leave>.sheet{animation:sink .2s var(--ease) forwards}
+@keyframes fadeOut{to{opacity:0}}
+@keyframes sink{to{opacity:0;transform:translateY(10px) scale(.985)}}
+.toast.out{animation:toastOut .2s var(--ease) forwards}
+@keyframes toastOut{to{opacity:0;transform:translate(-50%,8px)}}
+.sec>summary .s-ic{transition:background .25s var(--ease),transform .25s var(--ease)}
+.sec[open]>summary .s-ic{background:var(--text);color:#000}
+.btn .ic{transition:transform .3s var(--ease)}
+
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important}
 }
@@ -514,10 +572,9 @@ body.onb-open{overflow:hidden}
   <aside class="side" aria-label="Navegación">
     <div class="brand-mark" aria-hidden="true">€</div>
     <nav class="nav" id="sideNav"></nav>
-    <button class="side-add" data-action="add" type="button" aria-label="Añadir movimiento (tecla N)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+    <button class="side-add" data-action="add" type="button" aria-label="Añadir movimiento (tecla N)" data-tip="Tecla N">
+      <svg class="ic i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
     </button>
-    <span class="tiny">Tecla N</span>
   </aside>
   <main class="main" id="main">
     <div class="stack">
@@ -527,7 +584,7 @@ body.onb-open{overflow:hidden}
 </div>
 <nav class="tabs" id="tabNav" aria-label="Secciones"></nav>
 <button class="fab" data-action="add" type="button" aria-label="Añadir movimiento">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+  <svg class="ic i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
 </button>
 <div id="layer"></div>
 <div id="toastLayer" aria-live="polite"></div>
@@ -935,7 +992,7 @@ const IC={
   filter:'<path d="M3 5h18M6 12h12M10 19h4"/>',
   repeat:'<path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/>'
 };
-function icon(n,extra){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" '+(extra||'')+'>'+IC[n]+'</svg>'; }
+function icon(n,extra){ let cls='ic i-'+n; extra=(extra||'').replace(/class="([^"]*)"/,(m,c)=>{ cls+=' '+c; return ''; }); return '<svg class="'+cls+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" '+(extra||'')+'>'+IC[n]+'</svg>'; }
 
 const ROUTES=[
   {id:'inicio',label:'Inicio',icon:'home'},
@@ -1083,12 +1140,15 @@ function currentRoute(){
 }
 function go(h){ if(location.hash==='#'+h) render(); else location.hash=h; }
 let rzT=null, rzW=window.innerWidth; window.addEventListener('resize',()=>{ clearTimeout(rzT); rzT=setTimeout(()=>{ if((window.innerWidth<600)!==(rzW<600)){ rzW=window.innerWidth; render(); } },200); });
-window.addEventListener('hashchange',()=>{ render(); window.scrollTo(0,0); });
+window.addEventListener('hashchange',()=>{ S.routeAnim=true; render(); window.scrollTo(0,0); });
 
 function renderNav(){
   const r=currentRoute(); const cur=r.id==='proyecto'?'proyectos':r.id;
   const html=ROUTES.map(x=>'<a href="#'+x.id+'"'+(x.id===cur?' aria-current="page"':'')+'><span class="ic-wrap">'+icon(x.icon)+'</span><span>'+x.label+'</span></a>').join('');
-  $('#sideNav').innerHTML=html; $('#tabNav').innerHTML=html;
+  for(const nav of [$('#sideNav'),$('#tabNav')]){
+    if(!nav.children.length){ nav.innerHTML=html; continue; }
+    nav.querySelectorAll('a').forEach(a=>{ const on=a.getAttribute('href')==='#'+cur; if(on) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); });
+  }
 }
 
 // ---------- Render principal ----------
@@ -1115,6 +1175,8 @@ function render(){
   else if(r.id==='ajustes') html+=viewAjustes();
   const active=document.activeElement; const aid=active&&active.id; const sel=active&&active.selectionStart;
   main.innerHTML=html;
+  if((S.routeAnim||S.firstPaint)&&!RM()){ S.routeAnim=false; main.classList.add('route-in'); let k=0; main.querySelectorAll('.head,.hero,.lc-wrap,.lc-tabs,.actions-row,.banner,.card,.strip,.sec,.proj-wrap,.chips').forEach(el=>{ if(el.parentElement.closest('.rise')||(el.closest('.card')&&el!==el.closest('.card'))) return; el.classList.add('rise'); el.style.animationDelay=Math.min(k++*40,360)+'ms'; }); clearTimeout(S.rT); S.rT=setTimeout(()=>{ main.classList.remove('route-in'); main.querySelectorAll('.rise').forEach(el=>{ el.classList.remove('rise'); el.style.animationDelay=''; }); },1300); }
+  else S.routeAnim=false;
   if(aid && main.querySelector('#'+CSS.escape(aid))){ const el=document.getElementById(aid); el.focus(); try{ if(sel!=null) el.setSelectionRange(sel,sel);}catch(e){} }
   window.scrollTo(0,keepScroll);
   if(S.scrollTo){ const id=S.scrollTo; S.scrollTo=null; setTimeout(()=>{ const t=document.getElementById(id); if(t) t.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}); },60); }
@@ -1217,7 +1279,7 @@ function lineChart(series){
   return '<div class="lc-wrap"><svg class="lc" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Evolución del saldo disponible" data-series=\''+esc(JSON.stringify(series.map(p=>[p.date,p.v])))+'\' data-w="'+W+'" data-p="'+P+'"><defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+(up?'#1FC795':'#FF5F6D')+'" stop-opacity=".28"/><stop offset="1" stop-color="'+(up?'#1FC795':'#FF5F6D')+'" stop-opacity="0"/></linearGradient></defs>'
     +'<line class="base" x1="'+P+'" x2="'+(W-P)+'" y1="'+by+'" y2="'+by+'"/>'
     +'<path d="'+d+' L'+(W-P)+','+H+' L'+P+','+H+' Z" fill="url(#'+gid+')"/>'
-    +'<path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="2.4" stroke-linecap="round"/>'
+    +'<path class="ln" pathLength="1" d="'+d+'" fill="none" stroke="'+col+'" stroke-width="2.4" stroke-linecap="round"/>'
     +'<g class="tag"><rect x="'+P+'" y="'+(by-22)+'" width="'+tw+'" height="18" rx="6"/><text x="'+(P+7)+'" y="'+(by-9)+'">'+esc(tag)+'</text></g>'
     +'<circle cx="'+end[0]+'" cy="'+end[1]+'" r="9" fill="'+col+'" opacity=".2"/><circle cx="'+end[0]+'" cy="'+end[1]+'" r="4" fill="'+col+'"/>'
     +'<line class="cross" x1="0" x2="0" y1="0" y2="'+H+'" style="display:none"/><circle class="cdot" r="5" fill="'+col+'" stroke="#000" stroke-width="2" style="display:none"/>'
@@ -1231,7 +1293,7 @@ function sparkline(vals,color){
   const y0=4+(H-8)*(1-(0-min)/rng);
   const area='M'+pts[0][0]+','+y0+' L'+pts.map(p=>p.join(',')).join(' L')+' L'+pts[pts.length-1][0]+','+y0+' Z';
   const last=pts[pts.length-1];
-  return '<svg class="spark" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" aria-hidden="true"><path d="'+area+'" fill="'+color+'" opacity=".14"/><polyline points="'+pts.map(p=>p.join(',')).join(' ')+'" fill="none" stroke="'+color+'" stroke-width="2"/><circle cx="'+last[0]+'" cy="'+last[1]+'" r="3.5" fill="'+color+'"/></svg>';
+  return '<svg class="spark" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" aria-hidden="true"><path d="'+area+'" fill="'+color+'" opacity=".14"/><polyline class="ln" pathLength="1" points="'+pts.map(p=>p.join(',')).join(' ')+'" fill="none" stroke="'+color+'" stroke-width="2"/><circle cx="'+last[0]+'" cy="'+last[1]+'" r="3.5" fill="'+color+'"/></svg>';
 }
 function txRow(t){
   const c=t.type==='traspaso'||t.type==='ajuste'?'#8D969E':catColor(t.catId);
@@ -1440,7 +1502,7 @@ function viewPlan(){
   const sub=days==null?'Los domingos, 10 minutos':days===0?'Hecha hoy':'Última hace '+days+' día'+(days===1?'':'s');
   h+='<div class="card">'+cardH('Revisión semanal',sub,'<span class="pill ring '+(nDone===steps.length?'pos':'')+'">'+nDone+'/'+steps.length+'</span>'+pen('edit-review','Editar los pasos de la revisión'));
   h+='<div class="minis"><span class="pill '+(uncat?'warn':'pos')+'">'+(uncat?uncat+' sin categoría':'Todo categorizado')+'</span><span class="pill '+(s.net<0?'neg':'')+'">Neto '+fmtSigned(s.net)+'</span>'+(tot.pend?'<span class="pill warn">Bizum pendiente '+fmt(tot.pend)+'</span>':'')+'</div>';
-  h+='<div class="checks">'+steps.map((st,i)=>'<button class="ck" type="button" data-action="review-check" data-i="'+i+'" aria-pressed="'+done.includes(i)+'"><span class="box">'+icon('check')+'</span><span class="lbl">'+esc(st)+'</span></button>').join('')+'</div></div>';
+  h+='<div class="checks">'+steps.map((st,i)=>'<button class="ck'+(S.ckPop===i?' pop':'')+'" type="button" data-action="review-check" data-i="'+i+'" aria-pressed="'+done.includes(i)+'"><span class="box">'+icon('check')+'</span><span class="lbl">'+esc(st)+'</span></button>').join('')+'</div></div>';
   // Previsión
   if(isCur){
     const fc=forecastMonth(c,S.txs,todayISO());
@@ -1799,13 +1861,17 @@ async function saveSheet(more){
 
 // ---------- Modales genéricos ----------
 function openModal(inner,wide){ setTimeout(()=>{ const o=$('#layer .overlay'); if(o) o.classList.remove('enter'); },300); $('#layer').innerHTML='<div class="overlay enter" data-action="overlay"><div class="sheet'+(wide?' wide':'')+'" role="dialog" aria-modal="true">'+inner+'</div></div>'; const f=$('#layer input, #layer button.btn-primary'); if(f) setTimeout(()=>f.focus(),30); }
-function closeLayer(){ $('#layer').innerHTML=''; SH=null; ED=null; CAP=null; }
+function closeLayer(){
+  const o=$('#layer .overlay');
+  if(o&&!RM()){ o.removeAttribute('data-action'); o.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id')); o.classList.add('leave'); document.body.appendChild(o); setTimeout(()=>o.remove(),220); }
+  $('#layer').innerHTML=''; SH=null; ED=null; CAP=null;
+}
 let toastT=null;
 function toast(msg,undo){
   clearTimeout(toastT);
   $('#toastLayer').innerHTML='<div class="toast"><span>'+esc(msg)+'</span>'+(undo?'<button data-action="toast-undo">'+esc(undo.label)+'</button>':'')+'</div>';
   window._undo=undo?undo.fn:null;
-  toastT=setTimeout(()=>{ $('#toastLayer').innerHTML=''; window._undo=null; },5000);
+  toastT=setTimeout(()=>{ const t=$('#toastLayer .toast'); if(t) t.classList.add('out'); setTimeout(()=>{ if($('#toastLayer .toast.out')) $('#toastLayer').innerHTML=''; },220); window._undo=null; },5000);
 }
 
 function openAccounts(){
@@ -2206,7 +2272,7 @@ document.addEventListener('click',e=>{
     case 'bud-edit-go': S.budEdit=true; S.scrollTo='budgets'; go('plan'); break;
     case 'open-sec': { const o=LS.get('secOpen',SEC_DEFAULT); o[el.dataset.sec]=true; LS.set('secOpen',o); S.scrollTo='sec-'+el.dataset.sec; go('ajustes'); break; }
     case 'sec-all': { const on=el.dataset.v==='1'; const o={}; ['cuentas','proyectos','categorias','reglas','preferencias','datos','app','sesion'].forEach(k=>o[k]=on); LS.set('secOpen',o); render(); break; }
-    case 'review-check': { const i=+el.dataset.i; const wk=weekKey(); const done=reviewDone().slice(); const k=done.indexOf(i); if(k>=0) done.splice(k,1); else done.push(i);
+    case 'review-check': { const i=+el.dataset.i; S.ckPop=i; setTimeout(()=>{ S.ckPop=null; },400); const wk=weekKey(); const done=reviewDone().slice(); const k=done.indexOf(i); if(k>=0) done.splice(k,1); else done.push(i);
       const all=cfg().reviewSteps.every((_,j)=>done.includes(j));
       saveConfig(c=>{ c.reviewDone={week:wk,done}; if(all) c.lastReview=new Date().toISOString(); });
       if(all) toast('Revisión hecha. Hasta el próximo domingo.'); break; }
