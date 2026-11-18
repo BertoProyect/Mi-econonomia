@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<style>
+*{box-sizing:border-box;margin:0}
+html,body{width:720px;height:720px;overflow:hidden;background:#16181A}
+body{font-family:"Inter",sans-serif;color:#fff;-webkit-font-smoothing:antialiased;font-feature-settings:"tnum" 1}
+#s{position:absolute;inset:0}
+.abs{position:absolute}
+.muted{color:rgba(255,255,255,.62)}
+.pill{display:inline-flex;align-items:center;gap:12px;height:64px;padding:0 26px;border-radius:999px;background:#202326;font-size:26px;font-weight:600;white-space:nowrap}
+.dot{width:16px;height:16px;border-radius:50%;flex:none}
+.row{display:flex;align-items:center;gap:20px;height:96px;padding:0 28px;border-radius:24px;background:#202326}
+.ic{width:60px;height:60px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:26px;color:#000;flex:none}
+.t1{font-size:27px;font-weight:600}
+.t2{font-size:21px;color:rgba(255,255,255,.62);margin-top:4px}
+.amt{margin-left:auto;font-size:28px;font-weight:600}
+.pos{color:#1FC795}.neg{color:#FF5F6D}.warn{color:#F5A524}
+.btn{display:grid;place-items:center;height:76px;border-radius:999px;background:#fff;color:#000;font-size:28px;font-weight:700}
+</style></head>
+<body><div id="s"></div>
+<script>
+const W=720;
+const cl=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const p=(t,a,b)=>cl((t-a)/(b-a));                 // progreso lineal 0..1 entre a y b
+const eo=x=>1-Math.pow(1-x,5);                     // ease-out quint
+const eio=x=>x<.5?16*x**5:1-Math.pow(-2*x+2,5)/2;  // ease-in-out quint
+const E=(t,a,b)=>eo(p(t,a,b));
+const lerp=(a,b,x)=>a+(b-a)*x;
+const num=c=>{ const a=Math.abs(Math.round(c)); const i=String(Math.floor(a/100)).replace(/\B(?=(\d{3})+(?!\d))/g,'.'); return [i,String(a%100).padStart(2,'0')]; };
+const eur=c=>{ const [i,d]=num(c); return (c<0?'−':'')+i+','+d+' €'; };
+const big=c=>{ const [i,d]=num(c); return i+'<span style="font-size:.55em">,'+d+' €</span>'; };
+const fadeAll=(t,T)=>1-E(t,T-.6,T);               // fundido al final para el bucle
+const st=(o,ty=0,sc=1,blur=0)=>`opacity:${o.toFixed(3)};transform:translateY(${ty.toFixed(2)}px) scale(${sc.toFixed(4)});${blur?`filter:blur(${blur.toFixed(2)}px);`:''}`;
+const IN=(t,a,d=.6,dy=24)=>{ const x=E(t,a,a+d); return st(x,(1-x)*dy,1,(1-x)*6); };
+
+// ---------- Escena 1: todo tu dinero en una pantalla ----------
+function s1(t,T){
+  const v=Math.round(124830*E(t,.25,2.0));
+  const pts=[[0,.62],[.1,.58],[.2,.66],[.3,.5],[.42,.54],[.52,.4],[.62,.46],[.72,.3],[.84,.34],[1,.18]];
+  const cw=640, ch=200, ox=40, oy=330;
+  const d='M'+pts.map(([x,y])=>(ox+x*cw).toFixed(1)+' '+(oy+y*ch).toFixed(1)).join(' L');
+  const len=1100; const dp=E(t,.8,3.0);
+  const area=d+` L${ox+cw} ${oy+ch} L${ox} ${oy+ch} Z`;
+  const last=pts[pts.length-1]; const pulse=(t>3?Math.sin((t-3)*4)*.5+.5:0);
+  const pills=[['#494FDF','Revolut','1.040 €'],['#1FC795','Efectivo','208 €'],['#F5A524','Pendiente','200 €']];
+  return `
+  <div class="abs" style="left:0;right:0;top:70px;text-align:center;${IN(t,0,.6,16)}"><span class="muted" style="font-size:26px;font-weight:500">Disponible · EUR</span></div>
+  <div class="abs" style="left:0;right:0;top:112px;text-align:center;font-size:108px;font-weight:600;letter-spacing:-.02em;${st(E(t,.15,.8),(1-E(t,.15,.8))*18)}">${big(v)}</div>
+  <div class="abs" style="left:0;right:0;top:250px;text-align:center;font-size:25px;font-weight:600;${IN(t,1.8,.6,12)}"><span class="pos">+86,40 € ▲ 7,4 %</span><span class="muted" style="font-weight:500"> · últimos 30 días</span></div>
+  <svg class="abs" style="left:0;top:0" width="720" height="720">
+    <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#494FDF" stop-opacity=".45"/><stop offset="1" stop-color="#494FDF" stop-opacity="0"/></linearGradient>
+    <clipPath id="c"><rect x="0" y="0" width="${(ox+cw*dp).toFixed(1)}" height="720"/></clipPath></defs>
+    <path d="${area}" fill="url(#g)" clip-path="url(#c)" opacity="${(E(t,1.2,3)).toFixed(3)}"/>
+    <path d="${d}" fill="none" stroke="#9195FF" stroke-width="5" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="${len}" stroke-dashoffset="${(len*(1-dp)).toFixed(1)}"/>
+    <circle cx="${ox+cw}" cy="${oy+last[1]*ch}" r="${(10+pulse*8).toFixed(2)}" fill="#9195FF" opacity="${(p(t,2.9,3.1)*(.25+.25*(1-pulse))).toFixed(3)}"/>
+    <circle cx="${ox+cw}" cy="${oy+last[1]*ch}" r="9" fill="#fff" opacity="${p(t,2.9,3.1).toFixed(3)}"/>
+  </svg>
+  <div class="abs" style="left:24px;right:24px;top:596px;display:flex;justify-content:center;gap:10px">
+    ${pills.map((x,i)=>`<span class="pill" style="height:58px;padding:0 18px;gap:10px;font-size:21px;${IN(t,2.6+i*.18,.6,20)}"><span class="dot" style="background:${x[0]}"></span>${x[1]} <span class="${i===2?'warn':'muted'}" style="font-weight:600">${x[2]}</span></span>`).join('')}
+  </div>`;
+}
+
+// ---------- Escena 2: apunta en 10 segundos ----------
+function s2(t,T){
+  const txt='4,50 café efectivo'; const n=Math.floor(cl((t-.4)/1.3)*txt.length);
+  const typed=t<3.05?txt.slice(0,n):''; const caret=(Math.floor(t*2.2)%2===0)&&t<3.05;
+  const press=t>2.75&&t<3.05?.95:1;
+  const chips=[['−4,50 €','#FF5F6D',''],['Comer fuera','#FF8A3D','dot'],['Efectivo','#1FC795','dot']];
+  const slide=E(t,3.05,3.9);
+  const rows=[['C','#FF8A3D','Café','Hoy · Efectivo','−4,50 €'],['M','#2CCB95','Mercadona','Ayer · Revolut','−23,40 €'],['S','#7C5CFF','Spotify','5 nov · Revolut','−10,99 €']];
+  const toast=E(t,3.4,3.9)*(1-E(t,5.0,5.4));
+  return `
+  <div class="abs" style="left:40px;right:40px;top:60px;height:96px;border-radius:999px;background:#202326;display:flex;align-items:center;padding:0 12px 0 34px;font-size:34px;font-weight:500;${IN(t,0,.5,14)};box-shadow:inset 0 0 0 2px ${t>.3&&t<3.05?'rgba(145,149,255,.75)':'rgba(255,255,255,.08)'}">
+    <span>${typed||(t>=3.05?'<span class="muted">Ej.: 4,50 café efectivo</span>':'')}</span><span style="display:inline-block;width:3px;height:38px;background:#9195FF;margin-left:4px;opacity:${caret?1:0}"></span>
+    <span class="btn" style="margin-left:auto;height:72px;padding:0 30px;font-size:25px;${st(lerp(.35,1,E(t,2.0,2.4))*(t<3.05?1:.35),0,press)}">Guardar</span>
+  </div>
+  <div class="abs" style="left:40px;right:40px;top:180px;display:flex;gap:12px">
+    ${chips.map((c,i)=>{ const a=1.55+i*.22; const out=1-E(t,3.0,3.3); return `<span class="pill" style="height:58px;font-size:24px;padding:0 22px;${st(E(t,a,a+.45)*out,(1-E(t,a,a+.45))*14,lerp(.92,1,E(t,a,a+.45)))}">${c[2]?`<span class="dot" style="background:${c[1]}"></span>`:''}<span style="${c[2]?'':'color:'+c[1]}">${c[0]}</span></span>`; }).join('')}
+  </div>
+  <div class="abs" style="left:40px;right:40px;top:${lerp(268,268,0)}px">
+    ${rows.map((r,i)=>{ const isNew=i===0; const y=isNew?lerp(-30,0,slide):(lerp(-112,0,slide)+i*112); const o=isNew?slide:1; const top=isNew?0:y;
+      return `<div class="row abs" style="left:0;right:0;top:${(isNew?y:top).toFixed(1)}px;${st(o,0,isNew?lerp(.96,1,slide):1,isNew?(1-slide)*8:0)}${isNew&&t>3.05&&t<4.6?';box-shadow:inset 0 0 0 2px rgba(255,138,61,'+(.6*(1-p(t,3.8,4.6))).toFixed(3)+')':''}"><span class="ic" style="background:${r[1]}">${r[0]}</span><div><div class="t1">${r[2]}</div><div class="t2">${r[3]}</div></div><span class="amt">${r[4]}</span></div>`; }).join('')}
+  </div>
+  <div class="abs" style="left:0;right:0;bottom:56px;display:flex;justify-content:center"><span class="btn" style="height:68px;padding:0 34px;font-size:25px;font-weight:600;${st(toast,(1-toast)*20)}">Guardado · Café 4,50 €</span></div>`;
+}
+
+// ---------- Escena 3: el Bizum de tu amigo ----------
+function s3(t,T){
+  const inc=E(t,1.25,1.9);                       // llega al pendiente
+  const move=eio(p(t,3.1,4.2));                   // viaja al disponible
+  const pend=Math.round(20000*inc*(1-move));
+  const avail=104830+Math.round(20000*move);
+  const notifY=lerp(-140,54,E(t,.3,1.0)); const notifO=1-E(t,1.15,1.5);
+  const press=t>2.8&&t<3.05?.95:1;
+  const flash=t>4.1?(1-p(t,4.1,5.0)):0;
+  // chip que viaja
+  const cx=lerp(540,180,move), cy=lerp(420,300,move)-Math.sin(move*Math.PI)*120;
+  return `
+  <div class="abs" style="left:40px;right:40px;top:${notifY.toFixed(1)}px;height:110px;border-radius:28px;background:#2A2D31;display:flex;align-items:center;gap:20px;padding:0 26px;opacity:${notifO.toFixed(3)}">
+    <span class="ic" style="background:#7C5CFF">Ó</span><div><div class="t1">Bizum recibido</div><div class="t2">Pago de web · Órbita Webs</div></div><span class="amt pos">+200,00 €</span></div>
+  <div class="abs" style="left:40px;top:200px;width:310px;height:220px;border-radius:28px;background:#202326;padding:28px;${IN(t,0,.6,16)};box-shadow:inset 0 0 0 2px rgba(31,199,149,${(.8*flash).toFixed(3)})">
+    <div class="muted" style="font-size:23px;font-weight:500">Disponible</div>
+    <div style="font-size:44px;font-weight:600;margin-top:18px;letter-spacing:-.01em;white-space:nowrap">${eur(avail)}</div>
+    <div class="t2" style="margin-top:14px">Revolut + efectivo</div></div>
+  <div class="abs" style="left:370px;top:200px;width:310px;height:220px;border-radius:28px;background:#202326;padding:28px;${IN(t,.12,.6,16)};box-shadow:inset 0 0 0 2px rgba(245,165,36,${(.8*(inc*(1-move))).toFixed(3)})">
+    <div class="muted" style="font-size:23px;font-weight:500">Pendiente</div>
+    <div class="warn" style="font-size:44px;font-weight:600;margin-top:18px;letter-spacing:-.01em;white-space:nowrap">${eur(pend)}</div>
+    <div class="t2" style="margin-top:14px">En la cuenta de tu amigo</div></div>
+  <div class="abs" style="left:370px;top:446px;width:310px;${st(E(t,2.1,2.6)*(1-E(t,4.4,4.8)),(1-E(t,2.1,2.6))*14,press)}"><span class="btn" style="height:72px;font-size:25px">Me lo ha pasado</span></div>
+  <span class="pill abs" style="left:${(cx-75).toFixed(1)}px;top:${(cy-32).toFixed(1)}px;background:#F5A524;color:#000;height:64px;opacity:${(t>3.1&&t<4.25?1:0)}">+200 €</span>
+  <div class="abs" style="left:40px;right:40px;top:560px;text-align:center;font-size:25px;font-weight:500;${IN(t,4.3,.6,12)}"><span class="muted">El ingreso de Órbita cuenta </span>una sola vez</div>`;
+}
+
+// ---------- Escena 4: cómo acabas el mes ----------
+function s4(t,T){
+  const day=E(t,.2,1.2);
+  const fx=[['#7C5CFF','Spotify','−10,99 €',0,'Hecho'],['#A3E048','Gimnasio','−25,00 €',1.3,'Hecho'],['#7C5CFF','Paga','+50,00 €',99,'Día 28']];
+  const ox=40,cw=640,oy=440,ch=150; const cut=.6;
+  const solid=[[0,.3],[.12,.42],[.25,.38],[.38,.55],[.5,.5],[cut,.62]];
+  const proj=[[cut,.62],[.75,.66],[.88,.7],[1,.72]];
+  const pth=a=>'M'+a.map(([x,y])=>(ox+x*cw).toFixed(1)+' '+(oy+y*ch).toFixed(1)).join(' L');
+  const L1=520, L2=330; const d1=E(t,.6,1.8), d2=E(t,2.0,3.3);
+  const endV=Math.round(118334*E(t,2.4,3.6));
+  return `
+  <div class="abs" style="left:40px;right:40px;top:50px;${IN(t,0,.5,12)}"><div style="display:flex;justify-content:space-between;font-size:25px;font-weight:600"><span>Noviembre</span><span class="muted" style="font-weight:500">día ${Math.max(1,Math.round(18*day))} de 30</span></div>
+    <div style="height:10px;border-radius:9px;background:#2A2D31;margin-top:16px;overflow:hidden"><div style="height:100%;width:${(60*day).toFixed(2)}%;background:#9195FF;border-radius:9px"></div></div></div>
+  <div class="abs" style="left:40px;right:40px;top:136px;display:flex;flex-direction:column;gap:10px">
+    ${fx.map((f,i)=>{ const doneAt=f[3]; const done=t>=doneAt; const k=E(t,doneAt,doneAt+.4);
+      return `<div class="row" style="height:76px;${IN(t,.25+i*.12,.5,14)}"><span class="dot" style="background:${f[0]};width:18px;height:18px"></span><span class="t1" style="font-size:25px">${f[1]}</span>
+        <span class="pill" style="height:42px;font-size:19px;padding:0 16px;background:${done&&doneAt<99?'rgba(31,199,149,.16)':'#2A2D31'};color:${done&&doneAt<99?'#1FC795':'rgba(255,255,255,.62)'};transform:scale(${doneAt<99&&doneAt>0?lerp(.85,1,k).toFixed(3):1})">${doneAt<99&&(done)?'✓ Hecho':(doneAt>=99?'Día 28':'Pendiente')}</span>
+        <span class="amt ${f[2][0]==='+'?'pos':''}" style="font-size:25px">${f[2]}</span></div>`; }).join('')}
+  </div>
+  <svg class="abs" style="left:0;top:0" width="720" height="720">
+    <line x1="${ox+cut*cw}" y1="${oy-20}" x2="${ox+cut*cw}" y2="${oy+ch+10}" stroke="rgba(255,255,255,.18)" stroke-width="2" stroke-dasharray="4 8" opacity="${E(t,1.6,2).toFixed(3)}"/>
+    <path d="${pth(solid)}" fill="none" stroke="#9195FF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="${L1}" stroke-dashoffset="${(L1*(1-d1)).toFixed(1)}"/>
+    <path d="${pth(proj)}" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="5" stroke-linecap="round" stroke-dasharray="2 14" style="clip-path:inset(0 ${(100-(cut*100+(1-cut)*100*d2)).toFixed(2)}% 0 0)"/>
+    <circle cx="${ox+cw}" cy="${oy+.72*ch}" r="10" fill="#fff" opacity="${p(t,3.2,3.4).toFixed(3)}"/>
+  </svg>
+  <div class="abs" style="right:40px;top:${oy+ch+26}px;text-align:right;${IN(t,2.4,.7,16)}"><span class="muted" style="font-size:24px;font-weight:500">Fin de mes ≈ </span><span style="font-size:40px;font-weight:600">${eur(endV)}</span></div>`;
+}
+
+// ---------- Escena 5: importa tu extracto ----------
+function s5(t,T){
+  const drop=E(t,.2,1.0);
+  const rows=[['15 nov','Mercadona','#2CCB95','Comida y súper','−23,40 €',''],['14 nov','Spotify','#7C5CFF','Suscripciones','−10,99 €',''],['12 nov','Renfe','#4FC3F7','Transporte','−8,60 €',''],['11 nov','Exchanged to USD','#8C9DAE','Cambio de divisa','−20,00 €','skip'],['10 nov','Bizum · Órbita','#2CCB95','Clientes','+200,00 €','pos']];
+  const zoneO=1-E(t,1.15,1.5);
+  return `
+  <div class="abs" style="left:40px;right:40px;top:44px;height:150px;border-radius:28px;border:3px dashed rgba(255,255,255,${(.22*zoneO).toFixed(3)});display:grid;place-items:center;${st(E(t,0,.4),0)}">
+    <span class="muted" style="font-size:24px;opacity:${(zoneO*(1-drop)).toFixed(3)}">Suelta aquí el extracto</span></div>
+  <div class="abs" style="left:${lerp(170,130,drop).toFixed(1)}px;top:${lerp(-150,74,drop).toFixed(1)}px;width:460px;height:92px;border-radius:22px;background:#2A2D31;display:flex;align-items:center;gap:18px;padding:0 24px;transform:rotate(${lerp(-8,0,drop).toFixed(2)}deg) scale(${lerp(1.05,1,drop).toFixed(3)});opacity:${(cl(drop*3)*(1-E(t,1.3,1.6))).toFixed(3)}">
+    <span class="ic" style="background:#fff;border-radius:14px;font-size:20px">CSV</span><div><div class="t1" style="font-size:24px">revolut-noviembre.csv</div><div class="t2" style="font-size:19px">28 movimientos</div></div></div>
+  <div class="abs" style="left:40px;right:40px;top:54px;display:flex;flex-direction:column;gap:10px">
+    ${rows.map((r,i)=>{ const a=1.5+i*.28; const sk=r[5]==='skip'; const strike=sk?E(t,a+.5,a+.9):0;
+      return `<div class="row" style="height:78px;gap:16px;${IN(t,a,.55,18)};${sk?'opacity:'+(E(t,a,a+.55)*lerp(1,.5,strike)).toFixed(3):''}"><span class="muted" style="font-size:20px;width:74px">${r[0]}</span><span style="flex:1;min-width:0"><span class="t1" style="font-size:23px;display:block;${sk?'text-decoration:line-through;text-decoration-color:rgba(255,255,255,'+strike.toFixed(3)+')':''}">${r[1]}</span><span style="display:flex;align-items:center;gap:8px;font-size:19px;color:rgba(255,255,255,.62);margin-top:3px"><span class="dot" style="width:12px;height:12px;background:${r[2]}"></span>${sk&&strike>.5?'Ignorado':r[3]}</span></span><span class="amt ${r[5]==='pos'?'pos':''}" style="font-size:24px">${r[4]}</span></div>`; }).join('')}
+  </div>
+  <div class="abs" style="left:40px;right:40px;top:520px;display:flex;flex-wrap:wrap;gap:12px">
+    <span class="pill" style="height:54px;font-size:22px;background:rgba(73,79,223,.3);${IN(t,3.4,.5,12)}">27 importados</span>
+    <span class="pill" style="height:54px;font-size:22px;${IN(t,3.6,.5,12)}">1 cambio de divisa ignorado</span>
+    <span class="pill" style="height:54px;font-size:22px;background:rgba(31,199,149,.16);color:#1FC795;${IN(t,3.8,.5,12)}">Categorías automáticas</span>
+  </div>`;
+}
+
+const SCENES={1:[s1,6.2],2:[s2,6.6],3:[s3,6.6],4:[s4,6.4],5:[s5,6.6]};
+window.render=(n,t)=>{ const [f,T]=SCENES[n]; document.getElementById('s').innerHTML=f(t,T); document.getElementById('s').style.opacity=fadeAll(t,T).toFixed(3); };
+window.DUR=Object.fromEntries(Object.entries(SCENES).map(([k,v])=>[k,v[1]]));
+</script></body></html>

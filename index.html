@@ -27,7 +27,7 @@
   --font-body:"Inter","Helvetica Neue",Arial,sans-serif;
   --radius:20px; --radius-md:12px; --pill:999px;
   --ease:cubic-bezier(.22,1,.36,1);
-  --z-sticky:10; --z-nav:20; --z-fab:21; --z-backdrop:40; --z-toast:60;
+  --z-sticky:10; --z-nav:20; --z-fab:21; --z-backdrop:40; --z-takeover:50; --z-toast:60;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
@@ -336,6 +336,50 @@ textarea.input{resize:vertical;min-height:84px;padding:12px 14px;height:auto}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(28px + env(safe-area-inset-bottom));z-index:var(--z-toast);background:var(--text);color:#000;padding:10px 10px 10px 18px;border-radius:var(--pill);font-weight:600;font-size:14px;display:flex;align-items:center;gap:12px;max-width:calc(100% - 32px);animation:toastIn .3s var(--ease)}
 .toast span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .toast button{background:#000;color:#fff;border:0;border-radius:var(--pill);font-weight:600;padding:7px 14px;font-size:13px}
+/* ---------- Introducción (primera vez y desde Ajustes) ---------- */
+body.onb-open{overflow:hidden}
+.onb{position:fixed;inset:0;z-index:var(--z-takeover);background:var(--bg);display:flex;flex-direction:column;padding:calc(14px + env(safe-area-inset-top)) 20px calc(18px + env(safe-area-inset-bottom));animation:fade .35s var(--ease);overflow:auto}
+.onb-top{display:flex;align-items:center;gap:16px;max-width:1040px;width:100%;margin:0 auto}
+.onb-bars{flex:1;display:flex;gap:6px}
+.onb-bars i{flex:1;height:4px;border-radius:4px;background:rgba(255,255,255,.18);overflow:hidden;position:relative}
+.onb-bars i::after{content:"";position:absolute;inset:0;background:var(--text);transform-origin:left;transform:scaleX(0);transition:transform .5s var(--ease)}
+.onb-bars i.done::after,.onb-bars i.cur::after{transform:none}
+.onb-skip{background:none;border:0;color:var(--muted);font:inherit;font-weight:600;font-size:15px;padding:10px 4px;cursor:pointer;border-radius:8px}
+.onb-skip:hover{color:var(--text)}
+.onb-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;max-width:1040px;width:100%;margin:0 auto;padding:18px 0 8px}
+.onb-stage{position:relative;width:min(100%,52vh,520px);aspect-ratio:1;border-radius:32px;overflow:hidden;background:var(--surface);flex:none;touch-action:pan-y;isolation:isolate}
+.onb-stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.035);filter:blur(10px);transition:opacity .55s var(--ease),transform .7s var(--ease),filter .55s var(--ease)}
+.onb-stage video.on{opacity:1;transform:none;filter:none}
+.onb-play{position:absolute;right:14px;bottom:14px;z-index:1;display:none;align-items:center;gap:8px;height:40px;padding:0 16px;border:0;border-radius:var(--pill);background:rgba(0,0,0,.66);color:var(--text);font:inherit;font-weight:600;font-size:14px;cursor:pointer}
+.onb-play svg{width:16px;height:16px}
+.onb-copy{width:100%;max-width:520px;display:flex;flex-direction:column;gap:12px}
+#onbText{display:flex;flex-direction:column;gap:14px}
+.onb-copy h2{font-size:clamp(27px,4.4vw,40px);font-weight:600;letter-spacing:-.025em;line-height:1.08}
+.onb-copy p{margin:0;color:var(--muted);font-size:16.5px;line-height:1.5;max-width:46ch;text-wrap:pretty}
+.onb-copy p b{color:var(--text);font-weight:600}
+.onb-copy.swap>*{animation:rise .5s var(--ease) both}
+.onb-copy.swap>p{animation-delay:.06s}
+.onb-nav{display:flex;align-items:center;gap:10px;margin-top:8px}
+.onb-nav .btn-primary{flex:1;height:54px;font-size:16px;justify-content:center}
+.onb-back{width:54px;height:54px;flex:none;border-radius:50%;border:0;background:var(--surface-2);color:var(--text);display:grid;place-items:center;cursor:pointer;transition:opacity .25s var(--ease)}
+.onb-back svg{width:22px;height:22px}
+.onb-back[disabled]{display:none}
+@media (min-width:900px){
+  .onb{padding:28px 40px}
+  .onb-body{flex-direction:row;gap:64px}
+  .onb-stage{width:min(48vw,62vh,560px)}
+  .onb-copy{max-width:420px}
+  .onb-nav{margin-top:20px}
+  .onb-nav .btn-primary{flex:0 1 auto;min-width:220px}
+}
+@media (max-height:640px) and (max-width:899px){.onb-body{gap:18px}.onb-stage{width:min(100%,44vh)}}
+@media (prefers-reduced-motion:reduce){
+  .onb{animation:none}
+  .onb-stage video{transform:none;filter:none;transition:opacity .2s linear}
+  .onb-copy.swap>*{animation:none}
+  .onb-bars i::after{transition:none}
+  .onb-play{display:inline-flex}
+}
 @keyframes toastIn{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
 @media (max-width:860px){.toast{bottom:calc(150px + env(safe-area-inset-bottom))}}
 
@@ -750,6 +794,8 @@ const $=s=>document.querySelector(s);
 
 // ---------- Iconos ----------
 const IC={
+  play:'<path d="M7 4.5v15l12.5-7.5z" fill="currentColor" stroke="none"/>',
+  back:'<path d="M15 18l-6-6 6-6"/>',
   home:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
   list:'<path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/>',
   grid:'<rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/>',
@@ -949,6 +995,7 @@ function render(){
   if(aid && main.querySelector('#'+CSS.escape(aid))){ const el=document.getElementById(aid); el.focus(); try{ if(sel!=null) el.setSelectionRange(sel,sel);}catch(e){} }
   window.scrollTo(0,keepScroll);
   if(S.focusSearch && r.id==='movimientos'){ S.focusSearch=false; const q=document.getElementById('fq'); if(q) q.focus(); }
+  if(!S.cfg.onboardedAt&&!S.onbAuto&&!OB){ S.onbAuto=true; setTimeout(openOnboarding,350); }
   if(S.firstPaint){ S.firstPaint=false; main.querySelectorAll('.txlist').forEach(l=>l.classList.add('enter-list')); const hm=$('#heroMoney'); if(hm && !matchMedia('(prefers-reduced-motion: reduce)').matches) countUp(hm); }
 }
 function countUp(el){
@@ -1382,6 +1429,7 @@ function viewAjustes(){
   h+='<p class="small muted" style="margin:12px 0 0">El extracto de una cuenta Kids & Teens se descarga desde la app de Revolut del titular (tu padre o tu madre): Inicio → Cuentas → Kids & Teens → Más → Extracto, en Excel o CSV. Al importar se saltan los repetidos y te avisa de los que ya apuntaste a mano.</p></div>';
   // Móvil
   h+='<div class="card"><div class="card-h"><div><h2>App en el móvil</h2><p>Instalada se abre a pantalla completa, con su icono, y se sincroniza sola con el ordenador.</p></div>'+(installEvt?'<button class="btn btn-primary btn-sm" data-action="install">Instalar app</button>':'')+'</div><ol class="small" style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px"><li>En el OPPO, abre esta web en Chrome.</li><li>Menú ⋮ → «Instalar aplicación» (o «Añadir a pantalla de inicio»).</li><li>Entra con el mismo email. Lo que apuntes aparece en el ordenador al momento.</li></ol></div>';
+  h+='<div class="card"><div class="card-h" style="margin:0"><div><h2>Introducción</h2><p>Los cinco básicos de la app en un minuto, con animaciones.</p></div><button class="btn btn-sm" data-action="onboarding">'+icon('play')+' Verla otra vez</button></div></div>';
   h+='<div class="card"><div class="row"><div class="spacer small muted">Sesión iniciada como '+esc(S.email||'')+'</div><button class="btn" data-action="logout">Cerrar sesión</button></div></div>';
   h+='</div>';
   return h;
@@ -1518,6 +1566,64 @@ function openSettle(){
 }
 
 // ---------- Importar / exportar ----------
+// ---------- Introducción ----------
+// Sale sola la primera vez (cfg.onboardedAt vacío, se sincroniza entre móvil y ordenador) y se repite desde Ajustes.
+const ONB=[
+  {h:'Tu dinero, en una pantalla',p:'Revolut, efectivo y lo que tu amigo te guarda por Bizum. Arriba ves <b>lo que de verdad puedes gastar</b>, y la línea te dice si vas a mejor o a peor.'},
+  {h:'Apunta un gasto en 10 segundos',p:'Escribe <b>«4,50 café efectivo»</b> y la app rellena importe, categoría y cuenta. En el ordenador, pulsa la tecla <b>N</b> desde cualquier pantalla.'},
+  {h:'El Bizum de tu amigo, sin líos',p:'Lo que te pagan a su cuenta queda como <b>pendiente</b>. Cuando te lo pase, pulsa «Me lo ha pasado»: el ingreso de Órbita cuenta una sola vez.'},
+  {h:'Sabes cómo acabas el mes',p:'Marca como fijos Spotify, el gimnasio o los mantenimientos. La app te avisa de lo que falta y te dice <b>cuánto te quedará el día 30</b>.'},
+  {h:'Importa el extracto de Revolut',p:'CSV o Excel. Salta repetidos y cambios de divisa, y pone la categoría sola. Con <b>10 minutos cada domingo</b> lo tienes todo al día.'}
+];
+let OB=null;
+const RM=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
+function openOnboarding(){
+  if(OB) return;
+  closeLayer();
+  const el=document.createElement('div'); el.className='onb'; el.setAttribute('role','dialog'); el.setAttribute('aria-modal','true'); el.setAttribute('aria-labelledby','onbTitle');
+  el.innerHTML='<div class="onb-top"><div class="onb-bars" aria-hidden="true">'+ONB.map(()=>'<i></i>').join('')+'</div><button class="onb-skip" data-action="onb-skip">Saltar</button></div>'
+    +'<div class="onb-body"><div class="onb-stage" id="onbStage">'+ONB.map((_,i)=>'<video muted playsinline loop preload="'+(i<2?'auto':'none')+'" poster="onb/paso-'+(i+1)+'.jpg" src="onb/paso-'+(i+1)+'.mp4" aria-hidden="true" tabindex="-1"></video>').join('')
+    +'<button class="onb-play" data-action="onb-play">'+icon('play')+'<span>Ver animación</span></button></div>'
+    +'<div class="onb-copy"><span class="sr" id="onbCount"></span><div id="onbText" aria-live="polite"></div><div class="onb-nav"><button class="onb-back" data-action="onb-back" aria-label="Paso anterior">'+icon('back')+'</button><button class="btn btn-primary" id="onbNext" data-action="onb-next"></button></div></div></div>';
+  document.body.appendChild(el); document.body.classList.add('onb-open');
+  OB={el,i:-1,prevFocus:document.activeElement};
+  const stage=el.querySelector('#onbStage'); let x0=null;
+  stage.addEventListener('pointerdown',e=>{ x0=e.clientX; });
+  stage.addEventListener('pointerup',e=>{ if(x0==null) return; const dx=e.clientX-x0; x0=null; if(Math.abs(dx)>48) onbGo(OB.i+(dx<0?1:-1)); });
+  onbGo(0);
+  setTimeout(()=>{ const b=$('#onbNext'); if(b) b.focus(); },60);
+}
+function onbGo(i){
+  if(!OB) return; if(i<0) return; if(i>=ONB.length){ closeOnboarding(true); return; }
+  const first=OB.i<0; OB.i=i; const el=OB.el; const last=i===ONB.length-1;
+  el.querySelectorAll('.onb-bars i').forEach((b,k)=>{ b.className=k<i?'done':k===i?'cur':''; });
+  el.querySelectorAll('.onb-stage video').forEach((v,k)=>{
+    if(k===i){ v.classList.add('on'); v.preload='auto'; if(!RM()){ try{ v.currentTime=0; }catch(e){} const pr=v.play(); if(pr&&pr.catch) pr.catch(()=>{}); } }
+    else { v.classList.remove('on'); v.pause(); if(k===i+1) v.preload='auto'; }
+  });
+  const t=$('#onbText'); t.innerHTML='<h2 id="onbTitle">'+ONB[i].h+'</h2><p>'+ONB[i].p+'</p>';
+  const copy=el.querySelector('.onb-copy'); if(!first){ copy.classList.remove('swap'); void copy.offsetWidth; } copy.classList.add('swap');
+  $('#onbCount').textContent='Paso '+(i+1)+' de '+ONB.length;
+  el.querySelector('.onb-back').disabled=i===0;
+  $('#onbNext').textContent=last?(cfg().setupDone?'Empezar':'Poner mis saldos de hoy'):'Siguiente';
+  el.querySelector('.onb-skip').style.visibility=last?'hidden':'visible';
+}
+function closeOnboarding(finished){
+  if(!OB) return; const el=OB.el; const pf=OB.prevFocus; OB=null;
+  el.querySelectorAll('video').forEach(v=>{ v.pause(); v.removeAttribute('src'); v.load(); });
+  el.remove(); document.body.classList.remove('onb-open');
+  if(!cfg().onboardedAt) saveConfig(c=>{ c.onboardedAt=new Date().toISOString(); });
+  if(finished&&!cfg().setupDone) openSetup(); else if(pf&&pf.focus&&document.contains(pf)) pf.focus();
+}
+function onbKey(e){
+  if(!OB) return false;
+  if(e.key==='Escape'){ e.preventDefault(); closeOnboarding(false); return true; }
+  if(e.key==='ArrowRight'&&!/^(INPUT|TEXTAREA)$/.test(e.target.tagName)){ e.preventDefault(); onbGo(OB.i+1); return true; }
+  if(e.key==='ArrowLeft'){ e.preventDefault(); onbGo(OB.i-1); return true; }
+  if(e.key==='Tab'){ const f=[...OB.el.querySelectorAll('button:not([disabled])')].filter(b=>b.offsetParent!==null&&getComputedStyle(b).visibility!=='hidden'); if(!f.length) return true; const a=f.indexOf(document.activeElement); if(e.shiftKey&&a<=0){ e.preventDefault(); f[f.length-1].focus(); } else if(!e.shiftKey&&a===f.length-1){ e.preventDefault(); f[0].focus(); } return true; }
+  return true;
+}
+
 let IMP=null;
 function openImport(){
   openModal('<div class="sheet-h"><h2>Importar extracto</h2><button class="btn btn-ghost icon-btn" data-action="close" aria-label="Cerrar">'+icon('x')+'</button></div><p class="small muted" style="margin:0">Sube el extracto de Revolut (CSV o Excel) o el CSV que exportaste desde la versión de Claude. Los repetidos se saltan solos.</p><label class="btn" for="impFile" style="align-self:flex-start">'+icon('upload')+' Elegir archivo</label><input type="file" id="impFile" accept=".csv,.xlsx,.xls,text/csv,text/plain,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" class="sr"><div id="impBody"></div>',true);
@@ -1660,6 +1766,11 @@ document.addEventListener('click',e=>{
     case 'show-uncat': S.f=Object.assign({},S.f,{cat:'none',month:'all',type:'all',project:'all',account:'all',q:''}); go('movimientos'); break;
     case 'review': saveConfig(c=>{ c.lastReview=new Date().toISOString(); }); toast('Revisión apuntada. Hasta el próximo domingo.'); break;
     case 'export': doExport(); break;
+    case 'onboarding': openOnboarding(); break;
+    case 'onb-next': onbGo(OB?OB.i+1:0); break;
+    case 'onb-back': if(OB) onbGo(OB.i-1); break;
+    case 'onb-skip': closeOnboarding(false); break;
+    case 'onb-play': { const v=OB&&OB.el.querySelectorAll('.onb-stage video')[OB.i]; if(v){ if(v.paused){ v.currentTime=0; v.play().catch(()=>{}); } else v.pause(); } break; }
     case 'fixed-add': { const r=recurringStatus(S.txs,todayISO()).find(x=>x.tpl.id===el.dataset.id); if(!r) break; const t=r.tpl; const tx={id:uid('t'),type:t.type,amount:t.amount,date:r.due<=todayISO()?r.due:todayISO(),accountId:t.accountId,catId:t.catId,projectId:t.projectId||'personal',note:t.note||'',recurring:true,createdAt:Date.now()}; if(t.client) tx.client=t.client; writeTx(tx).then(()=>toast('Apuntado · '+txTitle(tx)+' '+fmt(tx.amount),{label:'Deshacer',fn:()=>deleteTx(tx.id)})).catch(()=>{}); break; }
     case 'import': openImport(); break;
     case 'imp-go': runImport(); break;
@@ -1748,6 +1859,7 @@ document.addEventListener('change',e=>{
   if(t.dataset.rule){ const id=t.dataset.rule,k=t.dataset.k; saveConfig(c=>{ const x=byId(c.rules,id); if(k==='projectId'&&!t.value) delete x.projectId; else x[k]=t.value; }); return; }
 });
 document.addEventListener('keydown',e=>{
+  if(onbKey(e)) return;
   if(e.key==='Escape'&&$('#layer').innerHTML){ closeLayer(); return; }
   const tag=(e.target.tagName||'').toLowerCase();
   if((e.key==='n'||e.key==='N')&&!e.metaKey&&!e.ctrlKey&&!e.altKey&&!['input','textarea','select'].includes(tag)&&!$('#layer').innerHTML&&S.cfg){ e.preventDefault(); openSheet(); }
