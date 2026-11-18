@@ -1,4 +1,8 @@
-node_modules/
+*.keystore
+.DS_Store
 android-app/android/
 android-app/capacitor.config.json
-.DS_Store
+android-app/mi-economia.apk
+android-app/node_modules/
+node_modules/
+release.keystore

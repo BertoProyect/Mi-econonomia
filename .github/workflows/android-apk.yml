@@ -1,14 +1,30 @@
-# Construye el APK de Android en GitHub (tu Mac no tiene que compilar nada).
-# Uso: pestaña Actions → "APK Android" → Run workflow. El APK aparece en "Artifacts".
+# Compila el APK de Android y lo publica en Releases cada vez que cambia la parte de Android.
+# La web se actualiza sola dentro de la app; esto solo hace falta para el código nativo
+# (botón de ajustes rápidos). La app avisa cuando hay una versión nueva.
+#
+# Firma: pon dos secretos en Settings → Secrets and variables → Actions:
+#   ANDROID_KEYSTORE_B64 y ANDROID_KS_PASS
+# Sin ellos se compila con una firma temporal (para actualizar habría que desinstalar antes).
 name: APK Android
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['android-app/**', '.github/workflows/android-apk.yml', 'icons/**']
+permissions:
+  contents: write
+concurrency:
+  group: apk
+  cancel-in-progress: false
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: android-app
+    env:
+      APP_URL: ${{ vars.APP_URL || 'https://dinero.bertoproject.com' }}
+      VERSION: ${{ github.run_number }}
+      KS_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+      KS_PASS: ${{ secrets.ANDROID_KS_PASS }}
+      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -18,26 +34,22 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-      - name: Instalar Capacitor
-        run: npm install
-      - name: Configurar URL de la web
-        env:
-          APP_URL: ${{ vars.APP_URL }}
-        run: node make-config.js
-      - name: Crear proyecto Android
-        run: npx cap add android && npx cap sync android
-      - name: Poner el icono
-        run: |
-          for d in android/app/src/main/res/mipmap-*; do
-            [ -f "$d/ic_launcher.png" ] && cp ../icons/icon-512.png "$d/ic_launcher.png"
-            [ -f "$d/ic_launcher_round.png" ] && cp ../icons/icon-512.png "$d/ic_launcher_round.png"
-            [ -f "$d/ic_launcher_foreground.png" ] && cp ../icons/maskable-512.png "$d/ic_launcher_foreground.png"
-          done
-          sed -i 's/#FFFFFF/#000000/I' android/app/src/main/res/values/ic_launcher_background.xml || true
       - name: Compilar APK
-        working-directory: android-app/android
-        run: chmod +x gradlew && ./gradlew assembleDebug --no-daemon
-      - uses: actions/upload-artifact@v4
-        with:
-          name: mi-economia-apk
-          path: android-app/android/app/build/outputs/apk/debug/app-debug.apk
+        shell: bash
+        run: |
+          set -o pipefail
+          bash android-app/build.sh 2>&1 | tee build.log
+      - name: Publicar versión
+        shell: bash
+        run: |
+          gh release delete build-fallido -y --cleanup-tag || true
+          FIRMA=$(grep -o 'FIRMA=[a-z]*' build.log | tail -1 | cut -d= -f2)
+          gh release create "v${VERSION}" android-app/mi-economia.apk --latest \
+            --title "App Android 1.${VERSION}" \
+            --notes "Instala mi-economia.apk. Firma: ${FIRMA}. Con firma propia se instala encima sin perder nada."
+      - name: Guardar el error si falla
+        if: failure()
+        shell: bash
+        run: |
+          gh release delete build-fallido -y --cleanup-tag || true
+          gh release create build-fallido build.log --prerelease --title "Compilación fallida ${VERSION}" --notes "Registro del error para revisarlo."

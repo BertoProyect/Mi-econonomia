@@ -380,6 +380,13 @@ textarea.input{resize:vertical;min-height:84px;padding:12px 14px;height:auto}
 .proj-wrap>.pen{position:absolute;top:16px;right:14px}
 .proj-wrap .proj>.row{padding-right:40px}
 
+/* Modo rápido (ventana flotante del botón de Android) */
+html.rapido,html.rapido body{background:transparent}
+html.rapido .side,html.rapido .tabs,html.rapido .fab,html.rapido #toastLayer:empty{display:none}
+html.rapido body:not(.locked) .main{visibility:hidden}
+html.rapido .overlay{background:transparent}
+html.rapido .toast{bottom:calc(28px + env(safe-area-inset-bottom))}
+
 /* Leer captura */
 .drop{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding:28px 18px;border-radius:var(--radius);background:var(--surface-2);border:1.5px dashed var(--line-2);transition:border-color .2s var(--ease),background .2s var(--ease)}
 .drop.over{border-color:var(--accent-text);background:var(--accent-soft)}
@@ -962,8 +969,11 @@ const S={
   month:monthOf(todayISO()), project:'all',
   f:{q:'',type:'all',project:'all',account:'all',cat:'all',month:monthOf(todayISO())},
   sample:null, downloads:null, ai:{busy:false,text:'',err:''},
-  route:'inicio', range:LS0('range',30), firstPaint:true
+  route:'inicio', range:LS0('range',30), firstPaint:true,
+  rapido:/MiEconomiaRapido/.test(navigator.userAgent)||location.hash==='#rapido', pendingWrites:0,
+  appVer:(navigator.userAgent.match(/MiEconomiaApp\/(\d+)/)||[])[1]||null
 };
+if(S.rapido) document.documentElement.classList.add('rapido');
 function heroMoney(c){
   const parts=EUR.formatToParts((c||0)/100); let int='',dec='',cur='',sign='';
   for(const p of parts){ if(p.type==='minusSign') sign='−'; else if(p.type==='integer'||p.type==='group') int+=(p.type==='group'?'\u202f':p.value); else if(p.type==='decimal') dec+=','; else if(p.type==='fraction') dec+=p.value; else if(p.type==='currency') cur=p.value; }
@@ -1052,9 +1062,15 @@ async function writeTx(tx){
   const local=Object.assign({id:tx.id},clean);
   if(i>=0) S.txs[i]=local; else S.txs.push(local);
   S.txs.sort(sortTx); render();
+  S.pendingWrites++;
   try{ await S.txCol.doc(tx.id).set(clean); }
   catch(e){ try{ await new Promise(r=>setTimeout(r,600+Math.random()*600)); await S.txCol.doc(tx.id).set(clean); } catch(e2){ toast(errMsg(e2,'No se guardó el movimiento')); throw e2; } }
+  finally{ S.pendingWrites--; if(S.rapido) rapidoMaybeClose(700); }
 }
+// Modo rápido (botón de ajustes rápidos de Android): al cerrar la hoja se cierra la ventana,
+// pero solo cuando ya se ha guardado todo.
+function nativo(){ return window.MiEconomiaNativo||null; }
+function rapidoMaybeClose(delay){ setTimeout(()=>{ if(S.rapido&&!$('#layer').innerHTML&&!OB&&S.pendingWrites<=0){ const n=nativo(); if(n){ if(!S.closing){ S.closing=true; n.cerrar(); } } else if(location.hash!=='#inicio'){ S.rapido=false; document.documentElement.classList.remove('rapido'); history.replaceState(null,'','#inicio'); render(); } } },delay||80); }
 async function deleteTx(id){
   const prev=S.txs.find(x=>x.id===id);
   S.txs=S.txs.filter(x=>x.id!==id); render();
@@ -1107,7 +1123,18 @@ async function boot(){
   if(!session){ S.fatal='login'; render(); return; }
   startData(session.user.id, session.user.email);
 }
+const REPO='BertoProyect/Mi-econonomia';
+const APK_URL='https://github.com/'+REPO+'/releases/latest/download/mi-economia.apk';
+async function checkApk(){
+  if(!S.appVer||S.rapido) return;
+  try{
+    const last=LS.get('apkCheck',0); let rel=LS.get('apkRel',null);
+    if(!rel||Date.now()-last>6*3600e3){ const r=await fetch('https://api.github.com/repos/'+REPO+'/releases/latest',{headers:{Accept:'application/vnd.github+json'}}); if(!r.ok) return; const j=await r.json(); rel={tag:j.tag_name,name:j.name,url:((j.assets||[]).find(a=>/\.apk$/.test(a.name))||{}).browser_download_url}; LS.set('apkRel',rel); LS.set('apkCheck',Date.now()); }
+    const n=+String(rel.tag||'').replace(/\D/g,''); if(n>+S.appVer&&rel.url){ S.newApk=rel; render(); }
+  }catch(e){}
+}
 function startData(uid,email){
+  setTimeout(checkApk,3000);
   S.fatal=null; S.uid=uid; S.email=email||'';
   const timer=setTimeout(()=>{ if(!(S.cfgLoaded&&S.txLoaded)){ S.offline=true; render(); } },10000);
   const store=makeStore(SB,uid); S.store=store;
@@ -1166,6 +1193,7 @@ function render(){
   document.body.classList.toggle('locked',!!S.fatal);
   renderNav();
   const main=$('#main');
+  if(S.rapido && S.cfg && S.txLoaded && !S.rapidoOpened){ S.rapidoOpened=true; setTimeout(()=>openSheet(),30); }
   if(location.hash==='#captura' && S.cfg && S.txLoaded){ history.replaceState(null,'','#inicio'); setTimeout(capFromShare,50); }
   if(location.hash==='#nuevo' && S.cfg && S.txLoaded){ history.replaceState(null,'','#inicio'); setTimeout(()=>openSheet(),50); }
   const r=currentRoute(); S.route=r.id;
@@ -1191,7 +1219,7 @@ function render(){
   window.scrollTo(0,keepScroll);
   if(S.scrollTo){ const id=S.scrollTo; S.scrollTo=null; setTimeout(()=>{ const t=document.getElementById(id); if(t) t.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}); },60); }
   if(S.focusSearch && r.id==='movimientos'){ S.focusSearch=false; const q=document.getElementById('fq'); if(q) q.focus(); }
-  if(!S.cfg.onboardedAt&&!S.onbAuto&&!OB){ S.onbAuto=true; setTimeout(openOnboarding,350); }
+  if(!S.rapido&&!S.cfg.onboardedAt&&!S.onbAuto&&!OB){ S.onbAuto=true; setTimeout(openOnboarding,350); }
   if(S.firstPaint){ S.firstPaint=false; main.querySelectorAll('.txlist').forEach(l=>l.classList.add('enter-list')); const hm=$('#heroMoney'); if(hm && !matchMedia('(prefers-reduced-motion: reduce)').matches) countUp(hm); }
 }
 function countUp(el){
@@ -1215,6 +1243,9 @@ document.addEventListener('pointermove',e=>{ if(e.target.closest&&e.target.close
 document.addEventListener('pointerout',e=>{ if(e.target.closest&&e.target.closest('svg.lc') && !(e.relatedTarget&&e.relatedTarget.closest&&e.relatedTarget.closest('svg.lc'))) chartLeave(e); });
 
 function viewFatal(){
+  if(S.fatal==='login'&&S.rapido){
+    return '<div class="card" style="max-width:420px;margin:30vh auto 0;display:flex;flex-direction:column;gap:14px"><h2>Entra primero en la app</h2><p class="muted" style="margin:0">El botón rápido usa tu sesión de la app. Ábrela una vez, entra con tu email y ya funcionará.</p><div class="row"><button class="btn btn-ghost" data-action="rapido-cerrar">Cerrar</button><span class="spacer"></span><button class="btn btn-primary" data-action="rapido-app">Abrir la app</button></div></div>';
+  }
   if(S.fatal==='login'){
     const mode=S.loginMode||'login';
     return '<div style="max-width:400px;margin:8vh auto 0;display:flex;flex-direction:column;gap:16px"><div class="brand-mark" style="width:56px;height:56px;font-size:26px;border-radius:16px">€</div><div><h1>'+(mode==='signup'?'Crea tu cuenta':'Mi Economía')+'</h1><p class="muted" style="margin:6px 0 0">'+(mode==='signup'?'Solo la primera vez. Después cierra el registro en Supabase para que nadie más pueda crear cuenta.':'Entra con tu cuenta. Tus datos están en tu propia base de datos.')+'</p></div>'
@@ -1408,6 +1439,7 @@ function alertsBlock(bal,tot){
     out.push('<div class="banner acc"><span class="b-ic">'+icon('wallet')+'</span><div class="b-body"><b>Empieza aquí: pon tus saldos de hoy</b><p>Revolut, efectivo y lo pendiente de Bizum. Así cuadra con la realidad desde hoy.</p></div><button class="btn btn-primary btn-sm" data-action="setup">Poner saldos</button></div>');
   }
   if(tot.pend>0){ const aj=activeAccounts().find(a=>a.kind==='ajena'&&(bal[a.id]||0)>0)||{}; out.push('<div class="banner warn"><span class="b-ic">'+icon('swap')+'</span><div class="b-body"><b>'+fmt(tot.pend)+' pendientes de '+esc(aj.name||'Bizum')+'</b><p>'+(aj.holder?esc(aj.holder)+' lo tiene':'Lo tiene tu amigo')+'. Cuando te lo pase a Revolut o en efectivo, apúntalo aquí.</p></div><button class="btn btn-sm" data-action="settle">Me lo ha pasado</button></div>'); }
+  if(S.newApk) out.push('<div class="banner acc"><span class="b-ic">'+icon('download')+'</span><div class="b-body"><b>Versión nueva de la app ('+esc(S.newApk.name)+')</b><p>Toca «Actualizar», abre el archivo y pulsa Instalar. No pierdes nada.</p></div><a class="btn btn-primary btn-sm" href="'+esc(S.newApk.url)+'" target="_blank" rel="noopener">Actualizar</a></div>');
   const none=S.txs.filter(t=>isFlow(t)&&!t.catId).length;
   if(none) out.push('<div class="banner warn"><span class="b-ic">'+icon('alert')+'</span><div class="b-body"><b>'+none+' movimiento'+(none>1?'s':'')+' sin categoría</b><p>Sin categoría no sabes en qué se va el dinero.</p></div><button class="btn btn-sm" data-action="show-uncat">Revisar</button></div>');
   if(hasTx && c.setupDone){
@@ -1658,6 +1690,7 @@ function viewAjustes(){
   h+=sec('datos','db','Tus datos',S.txs.length+' movimientos · solo los ve tu cuenta',b);
   // App
   b='<div class="sec-tools">'+(installEvt?'<button class="btn btn-sm btn-primary" data-action="install">Instalar app</button>':'')+'<button class="btn btn-sm" data-action="onboarding">'+icon('play')+' Ver la introducción</button></div>';
+  b+='<details class="sub-sec"'+(S.appVer?'':' open')+'><summary>'+icon('right')+'App Android con botón rápido'+(S.appVer?' · instalada (1.'+esc(S.appVer)+')':'')+'</summary><div class="small muted" style="margin:4px 0 0;display:flex;flex-direction:column;gap:8px"><p style="margin:0">Añade un botón «Apuntar» en los ajustes rápidos (donde el wifi y el bluetooth). La web se actualiza sola dentro de la app y, si cambia el botón, la app te avisa.</p><ol style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px"><li>Descarga e instala el APK (Android te pedirá permitir instalar desde Chrome).</li><li>Abre la app y entra con tu email.</li><li>Baja la barra dos veces → lápiz de editar → arrastra «Apuntar» arriba.</li></ol><a class="btn btn-sm" style="align-self:flex-start" href="'+APK_URL+'" target="_blank" rel="noopener">'+icon('download')+' Descargar APK</a></div></details>';
   b+='<details class="sub-sec"><summary>'+icon('right')+'Instalar en el móvil</summary><p class="small muted" style="margin:4px 0 0">Abre esta web en Chrome → menú ⋮ → «Instalar aplicación» → entra con el mismo email.</p></details>';
   h+=sec('app','phone','App e introducción','Instalar en el móvil y repasar lo básico',b);
   // Sesión
@@ -1877,6 +1910,7 @@ function closeLayer(){
   const o=$('#layer .overlay');
   if(o&&!RM()){ o.removeAttribute('data-action'); o.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id')); o.classList.add('leave'); document.body.appendChild(o); setTimeout(()=>o.remove(),220); }
   $('#layer').innerHTML=''; SH=null; ED=null; CAP=null;
+  if(S.rapido) rapidoMaybeClose(80);
 }
 let toastT=null;
 function toast(msg,undo){
@@ -2204,6 +2238,8 @@ document.addEventListener('click',e=>{
   const el=e.target.closest('[data-action]'); if(!el) return;
   const a=el.dataset.action;
   if(a==='overlay'){ if(e.target===el) closeLayer(); return; }
+  if(a==='rapido-cerrar'){ const n=nativo(); if(n) n.cerrar(); return; }
+  if(a==='rapido-app'){ const n=nativo(); if(n) n.abrirApp(); return; }
   if(a==='login-mode'){ S.loginMode=(S.loginMode==='signup'?'login':'signup'); render(); return; }
   if(!S.cfg && a!=='close') return;
   switch(a){
