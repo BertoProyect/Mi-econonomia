@@ -380,6 +380,27 @@ textarea.input{resize:vertical;min-height:84px;padding:12px 14px;height:auto}
 .proj-wrap>.pen{position:absolute;top:16px;right:14px}
 .proj-wrap .proj>.row{padding-right:40px}
 
+/* Leer captura */
+.drop{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding:28px 18px;border-radius:var(--radius);background:var(--surface-2);border:1.5px dashed var(--line-2);transition:border-color .2s var(--ease),background .2s var(--ease)}
+.drop.over{border-color:var(--accent-text);background:var(--accent-soft)}
+.drop .big{width:56px;height:56px;border-radius:50%;background:var(--text);color:#000;display:grid;place-items:center}
+.drop .big svg{width:24px;height:24px}
+.thumbs{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+.thumbs img{width:64px;height:64px;object-fit:cover;border-radius:12px;flex:none;background:var(--surface-2)}
+.scan{position:relative;overflow:hidden}
+.scan::after{content:"";position:absolute;left:0;right:0;height:40%;top:-40%;background:linear-gradient(180deg,transparent,rgba(145,149,255,.35),transparent);animation:scan 1.4s var(--ease) infinite}
+@keyframes scan{to{top:100%}}
+.capr{display:grid;grid-template-columns:auto 1fr;gap:10px 12px;padding:14px;border-radius:16px;background:var(--surface-2);align-items:start}
+.capr.off{opacity:.5}
+.capr input[type=checkbox]{width:22px;height:22px;margin:10px 0 0;accent-color:var(--pos)}
+.capr .f{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:8px}
+.capr .f .input{height:40px;font-size:14px;padding:0 10px;background:var(--surface)}
+.capr .f select.input{padding-right:30px;background-position:right 10px center}
+.capr .f .full{grid-column:1/-1}
+.capr .meta{grid-column:2;display:flex;gap:6px;flex-wrap:wrap}
+@media (max-width:480px){.capr .f{grid-template-columns:1fr 1fr}}
+@media (min-width:760px){.capr .f{grid-template-columns:minmax(0,2fr) minmax(0,.9fr) minmax(0,1fr) minmax(0,1.2fr)}.capr .f .full{grid-column:span 2}}
+
 /* Hoja / modal */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:var(--z-backdrop);display:flex;align-items:center;justify-content:center;padding:20px}
 .overlay.enter{animation:fade .2s var(--ease)}
@@ -903,6 +924,7 @@ const IC={
   bell:'<path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8M10.3 21a1.9 1.9 0 0 0 3.4 0"/>',
   alert:'<path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>',
   wallet:'<path d="M3 7a2 2 0 0 1 2-2h13v4"/><path d="M3 7v11a2 2 0 0 0 2 2h15V9H5a2 2 0 0 1-2-2z"/><circle cx="16" cy="14.5" r="1.2"/>',
+  camera:'<path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/>',
   pencil:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
   tag:'<path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.3"/>',
   wand:'<path d="M15 4V2M15 16v-2M8 9h2M20 9h2M17.8 11.8L19 13M17.8 6.2L19 5M3 21l9-9M12.2 6.2L11 5"/>',
@@ -1074,6 +1096,7 @@ function render(){
   document.body.classList.toggle('locked',!!S.fatal);
   renderNav();
   const main=$('#main');
+  if(location.hash==='#captura' && S.cfg && S.txLoaded){ history.replaceState(null,'','#inicio'); setTimeout(capFromShare,50); }
   if(location.hash==='#nuevo' && S.cfg && S.txLoaded){ history.replaceState(null,'','#inicio'); setTimeout(()=>openSheet(),50); }
   const r=currentRoute(); S.route=r.id;
   if(S.fatal){ main.innerHTML=viewFatal(); return; }
@@ -1084,7 +1107,7 @@ function render(){
   const keepScroll=window.scrollY;
   let html='';
   if(S.offline) html+='<div class="banner warn" style="margin-bottom:14px"><div class="b-body"><b>Sin conexión con tus datos.</b><p>Lo que ves puede no estar al día.</p></div></div>';
-  if(r.id==='inicio') html+=viewInicio();
+  if(r.id==='inicio'||r.id==='captura') html+=viewInicio();
   else if(r.id==='movimientos') html+=viewMovimientos();
   else if(r.id==='proyectos') html+=viewProyectos();
   else if(r.id==='proyecto') html+=viewProyecto(r.pid);
@@ -1262,7 +1285,7 @@ function viewInicio(){
   h+='<button class="pillbtn" data-action="accounts">Cuentas'+(tot.pend>0?' · '+fmtShort(tot.pend)+' pendiente':'')+'</button></div>';
   h+=lineChart(series);
   h+='<div class="lc-tabs" role="group" aria-label="Periodo">'+[[7,'1S'],[30,'1M'],[90,'3M'],[365,'1A']].map(([v,l])=>'<button class="chip" data-action="range" data-v="'+v+'" aria-pressed="'+(range===v)+'">'+l+'</button>').join('')+'</div>';
-  h+='<div class="actions-row"><button class="act" data-action="add"><span class="c">'+icon('plus')+'</span>Añadir</button><button class="act" data-action="add-transfer"><span class="c">'+icon('swap')+'</span>Traspaso</button><button class="act" data-action="import"><span class="c">'+icon('upload')+'</span>Importar</button><button class="act" data-action="go" data-to="plan"><span class="c">'+icon('target')+'</span>Plan</button></div>';
+  h+='<div class="actions-row"><button class="act" data-action="add"><span class="c">'+icon('plus')+'</span>Añadir</button><button class="act" data-action="add-transfer"><span class="c">'+icon('swap')+'</span>Traspaso</button><button class="act" data-action="import"><span class="c">'+icon('upload')+'</span>Importar</button><button class="act" data-action="capture"><span class="c">'+icon('camera')+'</span>Captura</button></div>';
   h+='</section><section class="stack" aria-label="Actividad">';
   h+=alertsBlock(bal,tot);
   const recent=S.txs.slice(0,6);
@@ -1342,7 +1365,7 @@ function viewMovimientos(){
   const st=stats(list);
   const months=[...new Set(S.txs.map(t=>monthOf(t.date)).concat([monthOf(todayISO())]))].sort().reverse();
   const opt=(v,l,sel)=>'<option value="'+esc(v)+'"'+(v===sel?' selected':'')+'>'+esc(l)+'</option>';
-  let h='<div class="head"><div><h1>Movimientos</h1><p>'+list.length+' movimiento'+(list.length===1?'':'s')+' · entra '+fmt(st.inc)+' · sale '+fmt(st.exp)+'</p></div><div class="row"><button class="btn" data-action="export">'+icon('download')+' Exportar CSV</button><button class="btn" data-action="import">'+icon('upload')+' Importar extracto</button></div></div>';
+  let h='<div class="head"><div><h1>Movimientos</h1><p>'+list.length+' movimiento'+(list.length===1?'':'s')+' · entra '+fmt(st.inc)+' · sale '+fmt(st.exp)+'</p></div><div class="row"><button class="btn btn-primary" data-action="capture">'+icon('camera')+' Captura</button><button class="btn" data-action="import">'+icon('upload')+' Extracto</button><button class="btn" data-action="export">'+icon('download')+' CSV</button></div></div>';
   const nAct=['month','type','project','account','cat'].filter(k=>f[k]!=='all'&&!(k==='month'&&f.month===monthOf(todayISO()))).length;
   h+='<div class="card" style="margin-bottom:16px"><div class="row nowrap"><input class="input" id="fq" data-filter="q" placeholder="Buscar: Mercadona, cliente, nota…" value="'+esc(f.q)+'" aria-label="Buscar" style="flex:1"></div>';
   h+='<details class="filters" style="margin-top:12px"'+(S.filtersOpen?' open':'')+'><summary>'+icon('filter')+'Filtros'+(nAct?' · '+nAct:'')+' <span class="muted" style="font-weight:500">'+esc(f.month==='all'?'todos los meses':monthLabel(f.month))+'</span></summary><div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:12px">';
@@ -1553,6 +1576,7 @@ function viewAjustes(){
   // Preferencias
   b='<div class="ilist">'+irow({action:'edit-goal',id:'goal',av:icon('target'),avCls:'ghost',t1:'Objetivo de ahorro',t2:'Lo que quieres guardar de cada ingreso',end:c.savingsGoal+' %'})
     +irow({action:'edit-review',id:'review',av:icon('check'),avCls:'ghost',t1:'Pasos de la revisión semanal',t2:c.reviewSteps.map(esc).join(' · '),end:c.reviewSteps.length})
+    +irow({action:'edit-aictx',id:'aictx',av:icon('spark'),avCls:'ghost',t1:'Lo que la IA sabe de ti',t2:c.aiContext?esc(c.aiContext):'Para leer capturas mejor',end:null})
     +irow({action:'bud-edit-go',id:'bud',av:icon('chart'),avCls:'ghost',t1:'Presupuestos',t2:Object.keys(c.budgets).length?Object.keys(c.budgets).length+' con límite'+(c.carryFrom?' · con arrastre':''):'Sin límites',end:null})+'</div>';
   h+=sec('preferencias','sliders','Preferencias','Ahorro '+c.savingsGoal+' % · revisión de '+c.reviewSteps.length+' pasos',b);
   // Datos
@@ -1621,6 +1645,9 @@ function openEditor(kind,id,extra){
     ED.steps=c.reviewSteps.slice();
     h=edHead('Pasos de la revisión')+'<div class="ed-steps" id="edSteps">'+edStepsHtml()+'</div><div class="row"><button class="btn btn-sm" data-action="ed-step-add">'+icon('plus')+' Añadir paso</button><button class="btn btn-sm btn-ghost" data-action="ed-step-reset">Volver a los de serie</button></div>'+edFoot('');
   }
+  else if(kind==='aictx'){
+    h=edHead('Lo que la IA sabe de ti')+'<div class="field"><label for="edCtx">Se envía junto a cada captura, con tus cuentas, categorías, reglas y últimos movimientos.</label><textarea class="input" id="edCtx" rows="7" maxlength="2000" placeholder="'+esc(AI_CTX_PH)+'">'+esc(c.aiContext||'')+'</textarea><p class="hint">Escribe lo que un asistente necesitaría para no equivocarse: quién te paga por Bizum, qué gastos son de cada proyecto, comercios raros…</p></div>'+edFoot('');
+  }
   else if(kind==='goal'){
     h=edHead('Objetivo de ahorro')+'<div class="field"><label for="edGoal">Porcentaje de cada ingreso que quieres guardar</label><div class="row nowrap"><input class="input num" id="edGoal" inputmode="numeric" value="'+c.savingsGoal+'" style="max-width:120px"><span class="muted">%</span></div><p class="hint">Lo normal es entre 10 y 30 %. Sale en «Este mes».</p></div>'+edFoot('');
   }
@@ -1650,6 +1677,8 @@ function edSave(){
   } else if(k==='review'){
     edReadSteps(); const steps=ED.steps.map(x=>x.trim()).filter(Boolean); if(!steps.length) return edErr('Deja al menos un paso.');
     saveConfig(c=>{ c.reviewSteps=steps; delete c.reviewDone; });
+  } else if(k==='aictx'){
+    const v=(document.getElementById('edCtx')||{}).value||''; saveConfig(c=>{ c.aiContext=v.trim().slice(0,2000); });
   } else if(k==='goal'){
     const v=Math.round(+g('edGoal').replace(',','.')); if(!(v>=0&&v<=100)) return edErr('Un número entre 0 y 100.');
     saveConfig(c=>{ c.savingsGoal=v; });
@@ -1709,7 +1738,7 @@ function drawSheet(){
   const clients=[...new Set(S.txs.filter(x=>x.client).map(x=>x.client))].slice(0,40);
   let h='<form id="txForm" class="sheet" novalidate><div class="sheet-h"><h2>'+(SH.mode==='edit'?'Editar movimiento':'Nuevo movimiento')+'</h2><button type="button" class="btn btn-ghost icon-btn" data-action="close" aria-label="Cerrar">'+icon('x')+'</button></div>';
   h+='<div class="seg" role="group" aria-label="Tipo">'+['gasto','ingreso','traspaso'].map(x=>'<button type="button" data-action="sh-type" data-t="'+x+'" aria-pressed="'+(t===x)+'">'+({gasto:'Gasto',ingreso:'Ingreso',traspaso:'Traspaso'})[x]+'</button>').join('')+'</div>';
-  if(SH.mode==='new') h+='<input class="input" id="qText" placeholder="Rápido: 4,50 café efectivo" autocomplete="off">';
+  if(SH.mode==='new') h+='<div class="row nowrap"><input class="input" id="qText" placeholder="Rápido: 4,50 café efectivo" autocomplete="off" style="flex:1"><button type="button" class="btn icon-btn" data-action="capture" aria-label="Leer una captura" title="Leer una captura" style="height:46px;width:46px">'+icon('camera')+'</button></div>';
   h+='<label class="amount-wrap" for="fAmount" style="color:'+(t==='ingreso'?'var(--pos)':'inherit')+'"><input id="fAmount" inputmode="decimal" autocomplete="off" placeholder="0,00" value="'+esc(centsToInput(SH.amount))+'" style="width:'+amtW(centsToInput(SH.amount))+'" aria-label="Importe"><span>€</span></label>';
   if(t!=='traspaso'){
     const shown=SH.allCats?cats:cats.filter((x,i)=>i<8||x.id===SH.catId);
@@ -1770,7 +1799,7 @@ async function saveSheet(more){
 
 // ---------- Modales genéricos ----------
 function openModal(inner,wide){ setTimeout(()=>{ const o=$('#layer .overlay'); if(o) o.classList.remove('enter'); },300); $('#layer').innerHTML='<div class="overlay enter" data-action="overlay"><div class="sheet'+(wide?' wide':'')+'" role="dialog" aria-modal="true">'+inner+'</div></div>'; const f=$('#layer input, #layer button.btn-primary'); if(f) setTimeout(()=>f.focus(),30); }
-function closeLayer(){ $('#layer').innerHTML=''; SH=null; ED=null; }
+function closeLayer(){ $('#layer').innerHTML=''; SH=null; ED=null; CAP=null; }
 let toastT=null;
 function toast(msg,undo){
   clearTimeout(toastT);
@@ -1805,6 +1834,113 @@ function openSettle(){
   const to=activeAccounts().find(a=>a.kind!=='ajena');
   openSheet({type:'traspaso',accountId:ajena.id,toAccountId:to&&to.id,amount:bal>0?bal:null,note:'Me pasa lo del Bizum',projectId:'orbita'});
 }
+
+// ---------- Leer captura con IA (Gemini, vía función de Supabase) ----------
+const AI_CTX_PH='Ejemplo: Los clientes de Órbita Webs me pagan por Bizum a la cuenta de un amigo (cuenta «Bizum»). Cloudflare, dominios y Canva son gastos de Órbita. La paga de mis padres es «Paga y familia».';
+let CAP=null;
+function openCapture(files){
+  CAP={step:'pick',files:[],rows:[],aviso:'',err:'',model:''};
+  drawCapture(); if(files&&files.length) capAddFiles(files);
+}
+function drawCapture(){
+  if(!CAP) return; let h='<div class="sheet-h"><h2>Leer captura</h2><button class="btn btn-ghost icon-btn" data-action="close" aria-label="Cerrar">'+icon('x')+'</button></div>';
+  const thumbs=CAP.files.length?'<div class="thumbs">'+CAP.files.map(f=>'<img src="'+f.url+'" alt="">').join('')+'</div>':'';
+  if(CAP.step==='pick'){
+    h+='<label class="drop" id="capDrop" for="capFile"><span class="big">'+icon('camera')+'</span><b>'+(CAP.files.length?'Añadir otra':'Elige una captura')+'</b><span class="small muted">Bizum, Revolut, un ticket o una factura. También puedes pegarla o arrastrarla.</span></label><input type="file" id="capFile" accept="image/*" multiple class="sr">'+thumbs;
+    h+='<div class="err" id="capErr">'+esc(CAP.err||'')+'</div><div class="row actions"><span class="spacer"></span><button class="btn btn-primary" data-action="cap-run"'+(CAP.files.length?'':' disabled')+'>'+icon('spark')+' Leer '+(CAP.files.length>1?CAP.files.length+' capturas':'captura')+'</button></div>';
+  } else if(CAP.step==='loading'){
+    h+='<div class="drop scan"><span class="big">'+icon('spark')+'</span><b>Leyendo…</b><span class="small muted">Unos segundos.</span></div>'+thumbs;
+  } else if(CAP.step==='review'){
+    const n=CAP.rows.filter(r=>r.on).length;
+    if(CAP.aviso) h+='<div class="banner warn"><span class="b-ic">'+icon('alert')+'</span><div class="b-body"><p style="margin:0">'+esc(CAP.aviso)+'</p></div></div>';
+    if(!CAP.rows.length) h+='<div class="empty"><h3>No he encontrado movimientos</h3><p>Prueba con una captura donde se vea el importe.</p></div>';
+    const c=cfg(); const opt=(v,l,sel)=>'<option value="'+esc(v)+'"'+(v===sel?' selected':'')+'>'+esc(l)+'</option>';
+    h+='<div class="stack" style="gap:10px">'+CAP.rows.map((r,i)=>{
+      const cats=c.categories.filter(x=>x.type===r.type&&(!x.archived||x.id===r.catId));
+      return '<div class="capr'+(r.on?'':' off')+'"><input type="checkbox" data-cap="'+i+'" data-k="on"'+(r.on?' checked':'')+' aria-label="Guardar este movimiento"><div class="f">'
+        +'<input class="input" data-cap="'+i+'" data-k="note" value="'+esc(r.note)+'" aria-label="Concepto">'
+        +'<input class="input num" data-cap="'+i+'" data-k="amount" inputmode="decimal" value="'+esc(centsToInput(r.amount))+'" aria-label="Importe en euros" placeholder="€">'
+        +'<select class="input" data-cap="'+i+'" data-k="type" aria-label="Tipo">'+opt('gasto','Gasto',r.type)+opt('ingreso','Ingreso',r.type)+opt('traspaso','Traspaso',r.type)+'</select>'
+        +'<input class="input" type="date" data-cap="'+i+'" data-k="date" value="'+esc(r.date)+'" aria-label="Fecha">'
+        +(r.type==='traspaso'?'<select class="input" data-cap="'+i+'" data-k="accountId" aria-label="Desde">'+activeAccounts().map(a=>opt(a.id,'De '+a.name,r.accountId)).join('')+'</select><select class="input" data-cap="'+i+'" data-k="toAccountId" aria-label="Hacia">'+activeAccounts().map(a=>opt(a.id,'A '+a.name,r.toAccountId)).join('')+'</select>'
+          :'<select class="input" data-cap="'+i+'" data-k="catId" aria-label="Categoría">'+opt('','Sin categoría',r.catId||'')+cats.map(x=>opt(x.id,x.name,r.catId)).join('')+'</select><select class="input" data-cap="'+i+'" data-k="accountId" aria-label="Cuenta">'+activeAccounts().map(a=>opt(a.id,a.name,r.accountId)).join('')+'</select>'
+          +'<select class="input full" data-cap="'+i+'" data-k="projectId" aria-label="Proyecto">'+activeProjects().map(p=>opt(p.id,p.name,r.projectId)).join('')+'</select>')
+        +'</div><div class="meta">'+(r.dup?'<span class="pill warn">Parece repetido</span>':'')+(r.fx?'<span class="pill warn">'+esc(r.fx)+': pon el importe en euros</span>':'')+(r.conf<0.6?'<span class="pill">Revisa: poca seguridad</span>':'')+(r.recurring?'<span class="pill acc">Fijo mensual</span>':'')+'</div></div>';
+    }).join('')+'</div>';
+    h+='<div class="err" id="capErr">'+esc(CAP.err||'')+'</div><div class="row actions"><button class="btn btn-ghost" data-action="cap-retry">'+icon('camera')+' Otra</button><span class="spacer"></span><button class="btn btn-primary" data-action="cap-save"'+(n?'':' disabled')+'>Guardar · '+n+'</button></div>';
+  }
+  const inner='<div class="sheet wide" role="dialog" aria-modal="true" id="capSheet">'+h+'</div>';
+  const old=$('#capSheet'); if(old){ const st=old.scrollTop; old.outerHTML=inner; $('#capSheet').scrollTop=st; }
+  else { $('#layer').innerHTML='<div class="overlay enter" data-action="overlay">'+inner+'</div>'; setTimeout(()=>{ const o=$('#layer .overlay'); if(o) o.classList.remove('enter'); },300); }
+  const d=$('#capDrop'); if(d){ ['dragenter','dragover'].forEach(ev=>d.addEventListener(ev,e=>{ e.preventDefault(); d.classList.add('over'); })); ['dragleave','drop'].forEach(ev=>d.addEventListener(ev,e=>{ e.preventDefault(); d.classList.remove('over'); })); d.addEventListener('drop',e=>{ const f=[...(e.dataTransfer.files||[])].filter(x=>/^image\//.test(x.type)); if(f.length) capAddFiles(f); }); }
+}
+// Reduce la imagen (máx. 1600 px, JPEG) para que vaya rápido y gaste poco
+function shrink(file){ return new Promise((ok,ko)=>{ const url=URL.createObjectURL(file); const img=new Image(); img.onload=()=>{ const k=Math.min(1,1600/Math.max(img.width,img.height)); const cv=document.createElement('canvas'); cv.width=Math.round(img.width*k); cv.height=Math.round(img.height*k); cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height); const data=cv.toDataURL('image/jpeg',.85); ok({url,mime:'image/jpeg',data:data.split(',')[1]}); }; img.onerror=()=>ko(new Error('img')); img.src=url; }); }
+async function capAddFiles(files){
+  if(!CAP) openCapture(); CAP.err='';
+  for(const f of files.filter(x=>/^image\//.test(x.type)).slice(0,6-CAP.files.length)){ try{ CAP.files.push(await shrink(f)); }catch(e){ CAP.err='Una de las imágenes no se pudo abrir.'; } }
+  CAP.step='pick'; drawCapture();
+  if(CAP.files.length&&!CAP.err) capRun();
+}
+async function capFromShare(){
+  try{ const c=await caches.open('eco-share'); const ks=await c.keys(); const files=[]; for(const k of ks){ const r=await c.match(k); const b=await r.blob(); files.push(new File([b],'captura.jpg',{type:b.type||'image/jpeg'})); await c.delete(k); } openCapture(files); }catch(e){ openCapture(); }
+}
+function capContext(){
+  const c=cfg(); const e=v=>Math.round(v)/100;
+  return { hoy:todayISO(), sobre_mi:c.aiContext||'',
+    cuentas:activeAccounts().map(a=>({id:a.id,nombre:a.name,tipo:a.kind==='ajena'?'ajena (pendiente de recibir)':'propia'})),
+    proyectos:activeProjects().map(p=>({id:p.id,nombre:p.name})),
+    categorias:c.categories.filter(x=>!x.archived).map(x=>({id:x.id,nombre:x.name,tipo:x.type})),
+    reglas:c.rules.filter(r=>r.match).map(r=>({palabra:r.match,catId:r.catId,projectId:r.projectId||undefined})),
+    ultimos:S.txs.slice(0,40).map(t=>({fecha:t.date,tipo:t.type,importe:e(t.amount),nota:t.note||'',catId:t.catId||'',cuenta:t.accountId,proyecto:t.projectId||''})) };
+}
+const CAP_ERR={nokey:'Falta la clave de Gemini. Ponla en Supabase → Edge Functions → Secrets con el nombre GEMINI_API_KEY.',badkey:'La clave de Gemini no vale. Revísala en Supabase → Edge Functions → Secrets.',quota:'Has llegado al límite gratis de Gemini por hoy. Prueba mañana o activa la facturación en Google.',auth:'Tu sesión ha caducado. Cierra sesión y vuelve a entrar.',noimage:'Elige al menos una imagen.',image:'La imagen es demasiado grande.',gemini:'Gemini no ha podido leerla. Prueba otra vez.',parse:'Gemini ha respondido algo raro. Prueba otra vez.'};
+async function capRun(){
+  if(!CAP||!CAP.files.length) return; CAP.step='loading'; CAP.err=''; drawCapture();
+  try{
+    const C=window.ECO_CONFIG||{}; const {data:{session}}=await SB.auth.getSession(); if(!session) throw {code:'auth'};
+    const res=await fetch(C.SUPABASE_URL.replace(/\/$/,'')+'/functions/v1/leer-captura',{method:'POST',headers:{'Content-Type':'application/json',authorization:'Bearer '+session.access_token,apikey:C.SUPABASE_ANON_KEY},body:JSON.stringify({images:CAP.files.map(f=>({mime:f.mime,data:f.data})),context:capContext()})});
+    let out={}; try{ out=await res.json(); }catch(e){}
+    if(!res.ok) throw {code:out.error||'gemini'};
+    CAP.model=out.model||''; CAP.aviso=out.aviso||''; CAP.rows=(out.movimientos||[]).map(capNormalize).filter(Boolean); CAP.step='review';
+  }catch(e){ CAP.step='pick'; CAP.err=CAP_ERR[e&&e.code]||(navigator.onLine?'No se pudo conectar con la función. ¿Está publicada en Supabase?':'Sin conexión.'); }
+  drawCapture();
+}
+function capNormalize(m){
+  const c=cfg(); const type=['gasto','ingreso','traspaso'].includes(m.type)?m.type:'gasto';
+  const own=(activeAccounts().find(a=>a.kind!=='ajena')||{}).id;
+  const accOk=id=>id&&acc(id)&&!acc(id).archived?id:null;
+  const cur=String(m.currency||'EUR').toUpperCase();
+  let amount=Math.round(Math.abs(+m.amount||0)*100); if(!amount) return null;
+  let date=/^\d{4}-\d{2}-\d{2}$/.test(m.date||'')?m.date:todayISO(); if(date>addDays(todayISO(),1)) date=todayISO();
+  const r={on:true,type,amount,date,note:String(m.note||'').slice(0,80),accountId:accOk(m.accountId)||own,toAccountId:accOk(m.toAccountId),client:m.client||'',recurring:!!m.recurring,conf:typeof m.confidence==='number'?m.confidence:1,fx:cur!=='EUR'?cur+' '+(+m.amount):''};
+  const cx=cat(m.catId); r.catId=cx&&cx.type===type&&!cx.archived?m.catId:null;
+  r.projectId=proj(m.projectId)&&!proj(m.projectId).archived?m.projectId:null;
+  if(!r.catId||!r.projectId){ const rule=matchRule(c,r.note); if(rule){ const rc=cat(rule.catId); if(!r.catId&&rc&&rc.type===type) r.catId=rule.catId; if(!r.projectId&&rule.projectId) r.projectId=rule.projectId; } }
+  if(!r.projectId) r.projectId=(acc(r.accountId)||{}).kind==='ajena'&&type==='ingreso'&&proj('orbita')?'orbita':'personal';
+  if(type==='traspaso'&&(!r.toAccountId||r.toAccountId===r.accountId)) r.toAccountId=(activeAccounts().find(a=>a.id!==r.accountId)||{}).id;
+  r.dup=S.txs.some(t=>t.type===type&&t.amount===amount&&Math.abs((new Date(t.date)-new Date(date))/86400000)<=2);
+  r.on=!r.dup&&!r.fx;
+  return r;
+}
+function capReadRow(i){
+  const r=CAP.rows[i]; if(!r) return;
+  document.querySelectorAll('[data-cap="'+i+'"]').forEach(el=>{ const k=el.dataset.k;
+    if(k==='on') r.on=el.checked; else if(k==='amount'){ const v=parseAmount(el.value); if(v){ r.amount=v; if(r.fx){ r.fx=''; r.on=true; } } }
+    else if(k==='type'){ if(el.value!==r.type){ r.type=el.value; const cx=cat(r.catId); if(!cx||cx.type!==r.type) r.catId=null; if(r.type==='traspaso'&&!r.toAccountId) r.toAccountId=(activeAccounts().find(a=>a.id!==r.accountId)||{}).id; } }
+    else r[k]=el.value||(k==='catId'?null:r[k]); });
+}
+async function capSave(){
+  CAP.rows.forEach((_,i)=>capReadRow(i));
+  const list=CAP.rows.filter(r=>r.on); if(!list.length) return;
+  if(list.some(r=>r.fx)){ CAP.err='Pon el importe en euros de los que están en otra divisa.'; drawCapture(); return; }
+  const txs=list.map((r,i)=>{ const t={id:uid('t'),type:r.type,amount:r.amount,date:r.date,accountId:r.accountId,note:r.note,projectId:r.projectId||'personal',createdAt:Date.now()+i,fromCapture:true};
+    if(r.type==='traspaso') t.toAccountId=r.toAccountId; else { t.catId=r.catId||null; if(!t.catId) delete t.catId; t.recurring=!!r.recurring; if(r.type==='ingreso'&&r.client) t.client=r.client; } return t; });
+  closeLayer(); CAP=null;
+  try{ for(const t of txs) await writeTx(t); toast(txs.length===1?'Guardado · '+txTitle(txs[0])+' '+fmt(txs[0].amount):txs.length+' movimientos guardados',{label:'Deshacer',fn:()=>txs.forEach(t=>deleteTx(t.id))}); }catch(e){}
+}
+// Pegar una captura (Ctrl+V) desde cualquier pantalla
+document.addEventListener('paste',e=>{ if(!S.cfg) return; const files=[...(e.clipboardData&&e.clipboardData.files||[])].filter(f=>/^image\//.test(f.type)); if(!files.length) return; e.preventDefault(); if(CAP&&$('#capSheet')) capAddFiles(files); else { closeLayer(); openCapture(files); } });
 
 // ---------- Importar / exportar ----------
 // ---------- Introducción ----------
@@ -2052,6 +2188,11 @@ document.addEventListener('click',e=>{
     case 'ed-cat': openEditor('cat',el.dataset.id||null,{t:el.dataset.t}); break;
     case 'ed-rule': openEditor('rule',el.dataset.id||null); break;
     case 'edit-goal': openEditor('goal'); break;
+    case 'edit-aictx': openEditor('aictx'); break;
+    case 'capture': closeLayer(); openCapture(); break;
+    case 'cap-run': capRun(); break;
+    case 'cap-save': capSave(); break;
+    case 'cap-retry': CAP.step='pick'; drawCapture(); break;
     case 'edit-review': openEditor('review'); break;
     case 'ed-save': edSave(); break;
     case 'ed-del': edDelete(el); break;
@@ -2102,6 +2243,8 @@ document.addEventListener('input',e=>{
 document.addEventListener('change',e=>{
   const t=e.target;
   if(t.id==='impFile'&&t.files&&t.files[0]){ handleImportFile(t.files[0]); return; }
+  if(t.id==='capFile'&&t.files&&t.files.length){ capAddFiles([...t.files]); return; }
+  if(t.dataset.cap!=null&&CAP){ capReadRow(+t.dataset.cap); if(t.type==='checkbox'||t.dataset.k==='type'||t.dataset.k==='amount') drawCapture(); return; }
   if(t.id==='impAcc'&&IMP){ IMP.accountId=t.value; return; }
   if(t.id==='carryToggle'){ const on=t.checked; saveConfig(c=>{ if(on) c.carryFrom=shiftMonth(monthOf(todayISO()),-1); else delete c.carryFrom; }); toast(on?'Arrastre activado: cuenta desde el mes pasado':'Arrastre desactivado'); return; }
   if(t.dataset.impamt!=null&&IMP){ const v=parseAmount(t.value); if(v){ const r=IMP.rows[+t.dataset.impamt]; r.amount=v; r.fxDone=true; } drawImport(); return; }

@@ -46,3 +46,11 @@ android-app/ + .github/workflows/android-apk.yml   APK opcional
 2. En el proyecto: Dominios personalizados → `dinero.bertoproject.com`.
 3. Supabase → Autenticación → Configuración de URL: pon `https://dinero.bertoproject.com` como URL del sitio y en las de redirección.
 La app no se indexa en Google (`noindex` en la página y cabecera `X-Robots-Tag` en `_headers`), así que no afecta al SEO de bertoproject.com.
+
+## Leer capturas con IA (Gemini)
+La app manda la captura a la función `leer-captura` de tu Supabase (código en `supabase/functions/leer-captura`), que la lee con Gemini junto a tus cuentas, categorías, reglas, últimos movimientos y el texto de Ajustes → Preferencias → «Lo que la IA sabe de ti».
+1. Crea una clave en https://aistudio.google.com/apikey
+2. Supabase → Edge Functions → Secrets → añade `GEMINI_API_KEY` con esa clave.
+3. Opcional: `GEMINI_MODEL` para fijar un modelo concreto. Si no, usa el Flash más nuevo.
+En la capa gratuita, Google puede usar lo que envías para mejorar sus productos. Con la facturación activada, no.
+En Android, con la app instalada: galería → Compartir → Mi Economía.
