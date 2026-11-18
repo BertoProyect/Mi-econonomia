@@ -1,0 +1,4 @@
+node_modules/
+android-app/android/
+android-app/capacitor.config.json
+.DS_Store
