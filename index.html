@@ -512,9 +512,19 @@ body.onb-open{overflow:hidden}
 @media (hover:hover){
   :is(a,button,label,summary):hover>.ic:not(.chev),:is(a,button,label,summary):hover>span>.ic,:is(a,button,label,summary):hover>.c>.ic{transform:var(--ic-h,scale(1.08))}
   .i-plus{--ic-h:rotate(90deg)} .i-x{--ic-h:rotate(90deg)} .i-gear{--ic-h:rotate(75deg);transition-duration:.6s}
-  .i-home{--ic-h:translateY(-2px)} .i-list{--ic-h:translateX(2px)} .i-target{--ic-h:scale(1.06)}
+  .i-home,.i-list,.i-upload,.i-download{--ic-h:none}
+  /* Casa: el tejado se levanta y la puerta se abre */
+  :is(a,button):hover .i-home path:nth-child(1){transform:translateY(-2.5px) rotate(-6deg)}
+  :is(a,button):hover .i-home path:nth-child(3){transform:scaleX(.25);transform-origin:left}
+  /* Lista: las filas hacen una ola y las líneas cambian de largo */
+  .i-list g{transition:transform .4s var(--ease)} .i-list g path:nth-child(2){transform-origin:left;transition:transform .4s var(--ease)}
+  :is(a,button):hover .i-list g:nth-child(1){transform:translateX(2.5px)} :is(a,button):hover .i-list g:nth-child(2){transform:translateX(2.5px);transition-delay:.07s} :is(a,button):hover .i-list g:nth-child(3){transform:translateX(2.5px);transition-delay:.14s}
+  :is(a,button):hover .i-list g:nth-child(1) path:nth-child(2){transform:scaleX(.55)} :is(a,button):hover .i-list g:nth-child(2) path:nth-child(2){transform:scaleX(.85);transition-delay:.07s} :is(a,button):hover .i-list g:nth-child(3) path:nth-child(2){transform:scaleX(.4);transition-delay:.14s}
+  /* Subir y bajar: solo se mueve la flecha; la línea de abajo se queda quieta */
+  :is(a,button,label):hover .i-upload path:nth-child(1){transform:translateY(-3px)}
+  :is(a,button,label):hover .i-download path:nth-child(1){transform:translateY(2px)} .i-target{--ic-h:scale(1.06)}
   .i-left{--ic-h:translateX(-3px)} .i-right{--ic-h:translateX(3px)} .i-back{--ic-h:translateX(-3px)}
-  .i-upload{--ic-h:translateY(-2px)} .i-download{--ic-h:translateY(2px)} .i-swap{--ic-h:rotate(180deg)} .i-repeat{--ic-h:rotate(180deg)}
+  .i-swap{--ic-h:rotate(180deg)} .i-repeat{--ic-h:rotate(180deg)}
   .i-camera{--ic-h:scale(1.1) rotate(-6deg)} .i-spark{--ic-h:scale(1.15) rotate(20deg)} .i-pencil{--ic-h:rotate(-14deg) translateY(-1px)}
   .i-check{--ic-h:scale(1.15)} .i-search{--ic-h:scale(1.1) rotate(-8deg)} .i-chart{--ic-h:scaleY(1.15)} .i-wallet{--ic-h:rotate(-8deg)}
   .i-play{--ic-h:translateX(2px) scale(1.08)} .i-filter{--ic-h:scaleX(.82)} .i-tag{--ic-h:rotate(-14deg)} .i-wand{--ic-h:rotate(-18deg)}
@@ -966,15 +976,15 @@ const $=s=>document.querySelector(s);
 const IC={
   play:'<path d="M7 4.5v15l12.5-7.5z" fill="currentColor" stroke="none"/>',
   back:'<path d="M15 18l-6-6 6-6"/>',
-  home:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
-  list:'<path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/>',
+  home:'<path d="M3 11l9-7 9 7"/><path d="M5 9.5V20h14V9.5"/><path d="M10 20v-5h4v5"/>',
+  list:'<g><path d="M3.5 6h.01"/><path d="M8 6h13"/></g><g><path d="M3.5 12h.01"/><path d="M8 12h13"/></g><g><path d="M3.5 18h.01"/><path d="M8 18h13"/></g>',
   grid:'<rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/>',
   target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/>',
   gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
   left:'<path d="M15 18l-6-6 6-6"/>', right:'<path d="M9 18l6-6-6-6"/>', x:'<path d="M18 6L6 18M6 6l12 12"/>',
   up:'<path d="M12 19V5M5 12l7-7 7 7"/>', down:'<path d="M12 5v14M19 12l-7 7-7-7"/>',
   swap:'<path d="M7 7h13l-4-4M17 17H4l4 4"/>', spark:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>',
-  upload:'<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>', download:'<path d="M12 4v12M7 11l5 5 5-5M4 20h16"/>', check:'<path d="M5 12l5 5L20 7"/>',
+  upload:'<path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 20h16"/>', download:'<path d="M12 4v12M7 11l5 5 5-5"/><path d="M4 20h16"/>', check:'<path d="M5 12l5 5L20 7"/>',
   search:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',
   chart:'<path d="M6 20V12M12 20V5M18 20v-9"/>',
   plus:'<path d="M12 5v14M5 12h14"/>',
@@ -1397,6 +1407,7 @@ function alertsBlock(bal,tot){
   if(!c.setupDone){
     out.push('<div class="banner acc"><span class="b-ic">'+icon('wallet')+'</span><div class="b-body"><b>Empieza aquí: pon tus saldos de hoy</b><p>Revolut, efectivo y lo pendiente de Bizum. Así cuadra con la realidad desde hoy.</p></div><button class="btn btn-primary btn-sm" data-action="setup">Poner saldos</button></div>');
   }
+  if(tot.pend>0){ const aj=activeAccounts().find(a=>a.kind==='ajena'&&(bal[a.id]||0)>0)||{}; out.push('<div class="banner warn"><span class="b-ic">'+icon('swap')+'</span><div class="b-body"><b>'+fmt(tot.pend)+' pendientes de '+esc(aj.name||'Bizum')+'</b><p>'+(aj.holder?esc(aj.holder)+' lo tiene':'Lo tiene tu amigo')+'. Cuando te lo pase a Revolut o en efectivo, apúntalo aquí.</p></div><button class="btn btn-sm" data-action="settle">Me lo ha pasado</button></div>'); }
   const none=S.txs.filter(t=>isFlow(t)&&!t.catId).length;
   if(none) out.push('<div class="banner warn"><span class="b-ic">'+icon('alert')+'</span><div class="b-body"><b>'+none+' movimiento'+(none>1?'s':'')+' sin categoría</b><p>Sin categoría no sabes en qué se va el dinero.</p></div><button class="btn btn-sm" data-action="show-uncat">Revisar</button></div>');
   if(hasTx && c.setupDone){
@@ -1675,7 +1686,8 @@ function openEditor(kind,id,extra){
     const a=id?acc(id):{name:'',kind:'propia',initial:0,initialDate:todayISO()}; ED.val=a.kind==='ajena'?'ajena':'propia';
     const used=id&&S.txs.some(t=>t.accountId===id||t.toAccountId===id);
     h=edHead(id?'Editar cuenta':'Nueva cuenta')+edName(a.name,null,'Revolut, efectivo, Bizum…',true);
-    h+='<div class="field"><span class="flabel">Tipo</span>'+edSeg('Tipo',[['propia','Propia'],['ajena','Pendiente de recibir']],ED.val)+'<p class="hint">«Pendiente» es dinero tuyo que aún no tienes, como un Bizum a otra cuenta. No cuenta como disponible.</p></div>';
+    h+='<div class="field"><span class="flabel">Tipo</span>'+edSeg('Tipo',[['propia','Propia'],['ajena','Pendiente de recibir']],ED.val)+'<p class="hint">«Pendiente» es dinero tuyo que tiene otra persona, como los Bizum que recibe tu amigo. No cuenta como disponible hasta que te lo pase.</p></div>';
+    h+='<div class="field" id="edHolderWrap"'+(ED.val==='ajena'?'':' hidden')+'><label for="edHolder">Quién te lo guarda</label><input class="input" id="edHolder" value="'+esc(a.holder||'')+'" placeholder="Su nombre, como sale en Revolut" autocomplete="off"><p class="hint">Cuando te pase dinero a Revolut, la app lo tomará como «me lo ha pasado» y no como un ingreso nuevo.</p></div>';
     h+='<div class="grid g-2e" style="gap:10px"><div class="field"><label for="edInit">Saldo inicial</label><input class="input num" id="edInit" inputmode="decimal" value="'+esc((a.initial<0?'-':'')+centsToInput(Math.abs(a.initial||0)))+'" placeholder="0,00"></div><div class="field"><label for="edDate">Desde el día</label><input class="input" type="date" id="edDate" value="'+esc(a.initialDate||todayISO())+'"></div></div>';
     if(id) h+='<div class="row" style="background:var(--surface-2);border-radius:14px;padding:12px 14px"><span class="spacer"><span class="small muted">Saldo hoy</span><br><b class="num">'+fmt(computeBalances(c,S.txs)[id]||0)+'</b></span><button class="btn btn-sm" data-action="reconcile" data-id="'+esc(id)+'">Cuadrar con la realidad</button></div>';
     h+=edFoot(id?(used?'':delBtn())+'<button class="btn btn-ghost" data-action="ed-archive">'+(a.archived?'Recuperar':'Archivar')+'</button>':'');
@@ -1724,7 +1736,7 @@ function edSave(){
   if(k==='account'){
     if(!name) return edErr('Ponle un nombre.');
     const raw=g('edInit'); const neg=/^\s*-/.test(raw); const ini=(parseAmount(raw)||0)*(neg?-1:1); const date=g('edDate')||todayISO();
-    saveConfig(c=>{ let a=id?byId(c.accounts,id):null; if(!a){ a={id:uid('a')}; c.accounts.push(a); } a.name=name; a.kind=ED.val; a.initial=ini; a.initialDate=date; if(ini) c.setupDone=true; });
+    saveConfig(c=>{ let a=id?byId(c.accounts,id):null; if(!a){ a={id:uid('a')}; c.accounts.push(a); } a.name=name; a.kind=ED.val; a.initial=ini; a.initialDate=date; const ho=(document.getElementById('edHolder')||{}).value||''; if(ED.val==='ajena'&&ho.trim()) a.holder=ho.trim(); else delete a.holder; if(ini) c.setupDone=true; });
   } else if(k==='project'){
     if(!name) return edErr('Ponle un nombre.');
     saveConfig(c=>{ let p=id?byId(c.projects,id):null; if(!p){ p={id:uid('p')}; c.projects.push(p); } p.name=name; p.color=ED.color; });
@@ -1898,11 +1910,11 @@ function openSettle(){
   const ajena=activeAccounts().find(a=>a.kind==='ajena'); if(!ajena) return;
   const bal=computeBalances(cfg(),S.txs)[ajena.id]||0;
   const to=activeAccounts().find(a=>a.kind!=='ajena');
-  openSheet({type:'traspaso',accountId:ajena.id,toAccountId:to&&to.id,amount:bal>0?bal:null,note:'Me pasa lo del Bizum',projectId:'orbita'});
+  openSheet({type:'traspaso',accountId:ajena.id,toAccountId:to&&to.id,amount:bal>0?bal:null,note:'Me pasa lo del Bizum'+(ajena.holder?' ('+ajena.holder+')':''),projectId:'orbita'});
 }
 
 // ---------- Leer captura con IA (Gemini, vía función de Supabase) ----------
-const AI_CTX_PH='Ejemplo: Los clientes de Órbita Webs me pagan por Bizum a la cuenta de un amigo (cuenta «Bizum»). Cloudflare, dominios y Canva son gastos de Órbita. La paga de mis padres es «Paga y familia».';
+const AI_CTX_PH='Ejemplo: Los clientes de Órbita Webs pagan por Bizum a mi amigo (cuenta «Bizum»); yo no veo esa cuenta. Luego él me lo pasa a Revolut o en efectivo. Cloudflare, dominios y Canva son gastos de Órbita. La paga de mis padres es «Paga y familia».';
 let CAP=null;
 function openCapture(files){
   CAP={step:'pick',files:[],rows:[],aviso:'',err:'',model:''};
@@ -1910,9 +1922,9 @@ function openCapture(files){
 }
 function drawCapture(){
   if(!CAP) return; let h='<div class="sheet-h"><h2>Leer captura</h2><button class="btn btn-ghost icon-btn" data-action="close" aria-label="Cerrar">'+icon('x')+'</button></div>';
-  const thumbs=CAP.files.length?'<div class="thumbs">'+CAP.files.map(f=>'<img src="'+f.url+'" alt="">').join('')+'</div>':'';
+  const thumbs=CAP.files.length?'<div class="thumbs">'+CAP.files.map(f=>f.url?'<img src="'+f.url+'" alt="">':'<span class="pill" style="height:64px;border-radius:12px;padding:0 14px">PDF</span>').join('')+'</div>':'';
   if(CAP.step==='pick'){
-    h+='<label class="drop" id="capDrop" for="capFile"><span class="big">'+icon('camera')+'</span><b>'+(CAP.files.length?'Añadir otra':'Elige una captura')+'</b><span class="small muted">Bizum, Revolut, un ticket o una factura. También puedes pegarla o arrastrarla.</span></label><input type="file" id="capFile" accept="image/*" multiple class="sr">'+thumbs;
+    h+='<label class="drop" id="capDrop" for="capFile"><span class="big">'+icon('upload')+'</span><b>'+(CAP.files.length?'Añadir otra':'Captura, foto o PDF')+'</b><span class="small muted">Notificación de Revolut, justificante, ticket o lo que te mande tu amigo. También puedes pegarla o arrastrarla.</span></label><input type="file" id="capFile" accept="image/*,application/pdf" multiple class="sr"><input type="file" id="capCam" accept="image/*" capture="environment" class="sr"><label class="btn" for="capCam" style="align-self:center">'+icon('camera')+' Hacer una foto</label>'+thumbs;
     h+='<div class="err" id="capErr">'+esc(CAP.err||'')+'</div><div class="row actions"><span class="spacer"></span><button class="btn btn-primary" data-action="cap-run"'+(CAP.files.length?'':' disabled')+'>'+icon('spark')+' Leer '+(CAP.files.length>1?CAP.files.length+' capturas':'captura')+'</button></div>';
   } else if(CAP.step==='loading'){
     h+='<div class="drop scan"><span class="big">'+icon('spark')+'</span><b>Leyendo…</b><span class="small muted">Unos segundos.</span></div>'+thumbs;
@@ -1938,13 +1950,14 @@ function drawCapture(){
   const inner='<div class="sheet wide" role="dialog" aria-modal="true" id="capSheet">'+h+'</div>';
   const old=$('#capSheet'); if(old){ const st=old.scrollTop; old.outerHTML=inner; $('#capSheet').scrollTop=st; }
   else { $('#layer').innerHTML='<div class="overlay enter" data-action="overlay">'+inner+'</div>'; setTimeout(()=>{ const o=$('#layer .overlay'); if(o) o.classList.remove('enter'); },300); }
-  const d=$('#capDrop'); if(d){ ['dragenter','dragover'].forEach(ev=>d.addEventListener(ev,e=>{ e.preventDefault(); d.classList.add('over'); })); ['dragleave','drop'].forEach(ev=>d.addEventListener(ev,e=>{ e.preventDefault(); d.classList.remove('over'); })); d.addEventListener('drop',e=>{ const f=[...(e.dataTransfer.files||[])].filter(x=>/^image\//.test(x.type)); if(f.length) capAddFiles(f); }); }
+  const d=$('#capDrop'); if(d){ ['dragenter','dragover'].forEach(ev=>d.addEventListener(ev,e=>{ e.preventDefault(); d.classList.add('over'); })); ['dragleave','drop'].forEach(ev=>d.addEventListener(ev,e=>{ e.preventDefault(); d.classList.remove('over'); })); d.addEventListener('drop',e=>{ const f=[...(e.dataTransfer.files||[])].filter(x=>/^image\//.test(x.type)||x.type==='application/pdf'); if(f.length) capAddFiles(f); }); }
 }
 // Reduce la imagen (máx. 1600 px, JPEG) para que vaya rápido y gaste poco
-function shrink(file){ return new Promise((ok,ko)=>{ const url=URL.createObjectURL(file); const img=new Image(); img.onload=()=>{ const k=Math.min(1,1600/Math.max(img.width,img.height)); const cv=document.createElement('canvas'); cv.width=Math.round(img.width*k); cv.height=Math.round(img.height*k); cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height); const data=cv.toDataURL('image/jpeg',.85); ok({url,mime:'image/jpeg',data:data.split(',')[1]}); }; img.onerror=()=>ko(new Error('img')); img.src=url; }); }
+function shrink(file){ if(file.type==='application/pdf') return new Promise((ok,ko)=>{ if(file.size>4500000) return ko(new Error('big')); const fr=new FileReader(); fr.onload=()=>ok({url:null,mime:'application/pdf',data:String(fr.result).split(',')[1]}); fr.onerror=ko; fr.readAsDataURL(file); });
+  return new Promise((ok,ko)=>{ const url=URL.createObjectURL(file); const img=new Image(); img.onload=()=>{ const k=Math.min(1,1600/Math.max(img.width,img.height)); const cv=document.createElement('canvas'); cv.width=Math.round(img.width*k); cv.height=Math.round(img.height*k); cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height); const data=cv.toDataURL('image/jpeg',.85); ok({url,mime:'image/jpeg',data:data.split(',')[1]}); }; img.onerror=()=>ko(new Error('img')); img.src=url; }); }
 async function capAddFiles(files){
   if(!CAP) openCapture(); CAP.err='';
-  for(const f of files.filter(x=>/^image\//.test(x.type)).slice(0,6-CAP.files.length)){ try{ CAP.files.push(await shrink(f)); }catch(e){ CAP.err='Una de las imágenes no se pudo abrir.'; } }
+  for(const f of files.filter(x=>/^image\//.test(x.type)||x.type==='application/pdf').slice(0,6-CAP.files.length)){ try{ CAP.files.push(await shrink(f)); }catch(e){ CAP.err=f.type==='application/pdf'?'El PDF pesa demasiado (máximo 4,5 MB).':'Una de las imágenes no se pudo abrir.'; } }
   CAP.step='pick'; drawCapture();
   if(CAP.files.length&&!CAP.err) capRun();
 }
@@ -1954,7 +1967,7 @@ async function capFromShare(){
 function capContext(){
   const c=cfg(); const e=v=>Math.round(v)/100;
   return { hoy:todayISO(), sobre_mi:c.aiContext||'',
-    cuentas:activeAccounts().map(a=>({id:a.id,nombre:a.name,tipo:a.kind==='ajena'?'ajena (pendiente de recibir)':'propia'})),
+    cuentas:activeAccounts().map(a=>({id:a.id,nombre:a.name,tipo:a.kind==='ajena'?'ajena (dinero del usuario que guarda otra persona)':'propia',quien_lo_guarda:a.holder||undefined,saldo:e(computeBalances(c,S.txs)[a.id]||0)})),
     proyectos:activeProjects().map(p=>({id:p.id,nombre:p.name})),
     categorias:c.categories.filter(x=>!x.archived).map(x=>({id:x.id,nombre:x.name,tipo:x.type})),
     reglas:c.rules.filter(r=>r.match).map(r=>({palabra:r.match,catId:r.catId,projectId:r.projectId||undefined})),
@@ -2112,6 +2125,8 @@ function processImportRows(rowsCSV){
       const dup=keys.has(it.importKey);
       const maybe=!dup&&manual.some(t=>t.type===it.type&&t.amount===it.amount&&Math.abs((new Date(t.date)-new Date(it.date))/86400000)<=2);
       if(res.own) return Object.assign({},it,{dup,maybe:false,on:!dup});
+      const hold=it.type==='ingreso'&&activeAccounts().find(a=>a.kind==='ajena'&&a.holder&&norm(it.note).includes(norm(a.holder)));
+      if(hold) return Object.assign({},it,{type:'traspaso',accountId:hold.id,fromHolder:true,dup,maybe,catId:null,projectId:null,on:!dup});
       const r=matchRule(cfg(),it.note);
       return Object.assign({},it,{dup,maybe,catId:r?r.catId:null,projectId:r&&r.projectId?r.projectId:null,on:!dup&&!maybe});
     });
@@ -2127,7 +2142,7 @@ function drawImport(){
   if(fx) h+='<p class="small warn" style="margin:0 0 10px">'+fx+' movimiento'+(fx>1?'s':'')+' en otra divisa. Revolut no incluye el tipo de cambio en el extracto: escribe lo que te cobraron en euros (lo ves en la app de Revolut).</p>';
   h+='<div class="grid g-2e" style="gap:10px;margin-bottom:10px"><div class="field"><label for="impAcc">Cuenta</label><select class="input" id="impAcc">'+activeAccounts().map(a=>'<option value="'+esc(a.id)+'"'+(a.id===IMP.accountId?' selected':'')+'>'+esc(a.name)+'</option>').join('')+'</select></div><div class="field"><label for="impProj">Proyecto por defecto</label><select class="input" id="impProj">'+activeProjects().map(p=>'<option value="'+esc(p.id)+'"'+(p.id===IMP.projectId?' selected':'')+'>'+esc(p.name)+'</option>').join('')+'</select></div></div>';
   h+='<div class="tbl-wrap" style="max-height:340px;overflow:auto"><table class="tbl"><thead><tr><th></th><th>Fecha</th><th>Concepto</th><th>Categoría</th><th class="r">Importe</th></tr></thead><tbody>';
-  r.forEach((x,i)=>{ h+='<tr style="'+(x.dup?'opacity:.45':'')+'"><td><input type="checkbox" data-imp="'+i+'"'+(x.on?' checked':'')+(x.dup?' disabled':'')+' aria-label="Importar fila"></td><td class="num">'+esc(x.date)+'</td><td>'+esc(x.note)+(x.maybe?' <span class="pill warn">¿repetido?</span>':'')+'</td><td>'+(x.catId?esc(catName(x.catId)):'<span class="muted">Sin categoría</span>')+'</td><td class="r num '+(x.type==='gasto'?'neg':'pos')+'">'+(x.fx&&!x.dup?'<span class="tiny muted">'+esc(x.fx)+' '+(x.fxAmount/100).toFixed(2).replace('.',',')+' → </span><input class="input num fx-in" data-impamt="'+i+'" inputmode="decimal" placeholder="€" value="'+(x.fxDone?esc(centsToInput(x.amount)):'')+'" aria-label="Importe en euros">':(x.type==='gasto'?'−':'+')+fmt(x.amount))+'</td></tr>'; });
+  r.forEach((x,i)=>{ h+='<tr style="'+(x.dup?'opacity:.45':'')+'"><td><input type="checkbox" data-imp="'+i+'"'+(x.on?' checked':'')+(x.dup?' disabled':'')+' aria-label="Importar fila"></td><td class="num">'+esc(x.date)+'</td><td>'+esc(x.note)+(x.fromHolder?' <span class="pill warn">Te lo pasa: traspaso desde '+esc((acc(x.accountId)||{}).name||'Bizum')+'</span>':'')+(x.maybe?' <span class="pill warn">¿repetido?</span>':'')+'</td><td>'+(x.catId?esc(catName(x.catId)):'<span class="muted">Sin categoría</span>')+'</td><td class="r num '+(x.type==='gasto'?'neg':x.type==='traspaso'?'muted':'pos')+'">'+(x.fx&&!x.dup?'<span class="tiny muted">'+esc(x.fx)+' '+(x.fxAmount/100).toFixed(2).replace('.',',')+' → </span><input class="input num fx-in" data-impamt="'+i+'" inputmode="decimal" placeholder="€" value="'+(x.fxDone?esc(centsToInput(x.amount)):'')+'" aria-label="Importe en euros">':(x.type==='gasto'?'−':'+')+fmt(x.amount))+'</td></tr>'; });
   h+='</tbody></table></div><div class="row" style="margin-top:12px"><span class="small muted">Lo que quede sin categoría te saldrá como pendiente de revisar.</span><span class="spacer"></span><button class="btn btn-primary" data-action="imp-go"'+(n?'':' disabled')+'>Importar '+n+'</button></div>';
   $('#impBody').innerHTML=h;
 }
@@ -2137,7 +2152,7 @@ async function runImport(){
   const rows=IMP.rows.filter(x=>x.on); const accId=IMP.accountId, pDef=IMP.projectId;
   closeLayer(); toast('Importando '+rows.length+' movimientos…');
   const now=Date.now();
-  const list=rows.map((x,i)=>{ const t={id:uid('i'),type:x.type,amount:x.amount,date:x.date,accountId:x.accountId||accId,note:x.note,catId:x.catId||null,projectId:x.projectId||pDef,imported:true,importKey:x.importKey,createdAt:now+i,recurring:!!x.recurring}; if(x.toAccountId) t.toAccountId=x.toAccountId; if(x.client) t.client=x.client; return t; });
+  const list=rows.map((x,i)=>{ const t={id:uid('i'),type:x.type,amount:x.amount,date:x.date,accountId:x.fromHolder?x.accountId:(x.accountId||accId),note:x.note,catId:x.catId||null,projectId:x.projectId||pDef,imported:true,importKey:x.importKey,createdAt:now+i,recurring:!!x.recurring}; if(x.fromHolder){ t.toAccountId=accId; delete t.catId; } else if(x.toAccountId) t.toAccountId=x.toAccountId; if(x.client) t.client=x.client; return t; });
   try{ await S.txCol.bulk(list); toast('Importados '+list.length+' movimientos'); }
   catch(e){ toast('La importación falló. Vuelve a importar el mismo archivo: lo ya guardado se salta.'); }
 }
@@ -2264,7 +2279,7 @@ document.addEventListener('click',e=>{
     case 'ed-del': edDelete(el); break;
     case 'ed-archive': edArchive(); break;
     case 'ed-color': edPickColor(el.dataset.c); break;
-    case 'ed-seg': { if(!ED) break; ED.val=el.dataset.v; el.parentNode.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b===el))); const w=$('#edBudWrap'); if(w) w.hidden=ED.val!=='gasto'; break; }
+    case 'ed-seg': { if(!ED) break; ED.val=el.dataset.v; el.parentNode.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b===el))); const w=$('#edBudWrap'); if(w) w.hidden=ED.val!=='gasto'; const hw=$('#edHolderWrap'); if(hw) hw.hidden=ED.val!=='ajena'; break; }
     case 'ed-step-add': edReadSteps(); ED.steps.push(''); $('#edSteps').innerHTML=edStepsHtml(); { const l=document.querySelectorAll('[data-step]'); l[l.length-1].focus(); } break;
     case 'ed-step-del': edReadSteps(); ED.steps.splice(+el.dataset.i,1); $('#edSteps').innerHTML=edStepsHtml(); break;
     case 'ed-step-reset': ED.steps=REVIEW_STEPS.slice(); $('#edSteps').innerHTML=edStepsHtml(); break;
@@ -2309,7 +2324,7 @@ document.addEventListener('input',e=>{
 document.addEventListener('change',e=>{
   const t=e.target;
   if(t.id==='impFile'&&t.files&&t.files[0]){ handleImportFile(t.files[0]); return; }
-  if(t.id==='capFile'&&t.files&&t.files.length){ capAddFiles([...t.files]); return; }
+  if((t.id==='capFile'||t.id==='capCam')&&t.files&&t.files.length){ capAddFiles([...t.files]); return; }
   if(t.dataset.cap!=null&&CAP){ capReadRow(+t.dataset.cap); if(t.type==='checkbox'||t.dataset.k==='type'||t.dataset.k==='amount') drawCapture(); return; }
   if(t.id==='impAcc'&&IMP){ IMP.accountId=t.value; return; }
   if(t.id==='carryToggle'){ const on=t.checked; saveConfig(c=>{ if(on) c.carryFrom=shiftMonth(monthOf(todayISO()),-1); else delete c.carryFrom; }); toast(on?'Arrastre activado: cuenta desde el mes pasado':'Arrastre desactivado'); return; }

@@ -78,17 +78,19 @@ Deno.serve(async (req) => {
   try { body = await req.json(); } catch (_) { return json({ error: "body" }, 400); }
   const images: { mime: string; data: string }[] = (body.images || []).slice(0, 6);
   if (!images.length) return json({ error: "noimage" }, 400);
-  if (images.some((i) => !/^image\//.test(i.mime) || typeof i.data !== "string" || i.data.length > 6_000_000)) return json({ error: "image" }, 400);
+  if (images.some((i) => !(/^image\//.test(i.mime) || i.mime === "application/pdf") || typeof i.data !== "string" || i.data.length > 6_000_000)) return json({ error: "image" }, 400);
   const ctx = body.context || {};
 
   const prompt = [
-    "Eres el asistente de finanzas personales de una app. Lee las capturas (pueden ser de Bizum, Revolut, un ticket, una factura o un chat) y extrae los movimientos de dinero.",
+    "Eres el asistente de finanzas personales de una app. Lee las capturas o PDF (pueden ser notificaciones, justificantes de Revolut o Bizum, tickets, facturas o un chat) y extrae los movimientos de dinero.",
     "Reglas:",
     "- amount siempre positivo y en euros. type: gasto si sale dinero, ingreso si entra, traspaso si va entre dos cuentas del usuario.",
     "- Si la divisa no es EUR, pon currency con su código y amount con la cifra tal cual aparece.",
     "- Usa SOLO los id de las listas del contexto para catId, projectId, accountId y toAccountId. Si dudas de la categoría, deja catId vacío.",
     "- Fechas: si la captura no trae año, usa el año de hoy; si dice «hoy» o «ayer», calcúlalo desde la fecha de hoy.",
-    "- Bizum: si el dinero llega a otra cuenta que no es del usuario, usa la cuenta de tipo «ajena».",
+    "- Bizum: los clientes pueden pagar a otra persona que guarda el dinero del usuario (cuenta de tipo «ajena»). Un cobro así es un ingreso en esa cuenta ajena.",
+    "- Si entra dinero en una cuenta propia y viene de la persona de «quien_lo_guarda», NO es un ingreso: es un traspaso con accountId = la cuenta ajena y toAccountId = la cuenta propia.",
+    "- Si es una notificación del móvil, lee solo el movimiento que describe.",
     "- No inventes movimientos. No repitas los que ya están en «ultimos» (misma fecha, importe y concepto).",
     "- Aplica las reglas automáticas del contexto si la nota contiene su palabra.",
     "- Respeta lo que diga «sobre_mi».",

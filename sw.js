@@ -1,6 +1,6 @@
 // Service worker: la app abre al instante y sin red muestra la última versión.
 // Los datos (Supabase) nunca se guardan aquí: siempre van a la red.
-const CACHE = 'eco-v6';
+const CACHE = 'eco-v7';
 const SHELL = ['./', 'index.html', 'config.js', 'vendor/supabase.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE && k !== 'eco-share').map(k => caches.delete(k)))).then(() => self.clients.claim())); });
