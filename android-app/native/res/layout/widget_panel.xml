@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Panel común de los widgets «Mi Economía», «Saldo» y «Gráfica».
+  El código (Widgets.java) enseña u oculta cada parte según el tamaño:
+  saldo solo, saldo + gráfica, saldo + gráfica + botones, fila (saldo | gráfica | botones)...
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_fondo"
+    android:clipToOutline="true"
+    android:gravity="center_vertical"
+    android:orientation="vertical"
+    android:padding="@dimen/widget_pad">
+
+    <LinearLayout
+        android:id="@+id/w_fila"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:id="@+id/w_bloque"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/w_etiqueta"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="2dp"
+                android:includeFontPadding="false"
+                android:maxLines="1"
+                android:text="@string/widget_disponible"
+                android:textColor="@color/widget_texto2"
+                android:textSize="12dp" />
+
+            <TextView
+                android:id="@+id/w_saldo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:fontFamily="sans-serif-medium"
+                android:includeFontPadding="false"
+                android:letterSpacing="-0.01"
+                android:maxLines="1"
+                android:text="@string/widget_abre"
+                android:textColor="@color/widget_texto"
+                android:textSize="28dp" />
+
+            <TextView
+                android:id="@+id/w_cambio"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:ellipsize="end"
+                android:includeFontPadding="false"
+                android:maxLines="1"
+                android:textColor="@color/widget_texto2"
+                android:textSize="12dp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/w_extra"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:ellipsize="end"
+                android:includeFontPadding="false"
+                android:maxLines="1"
+                android:textColor="@color/widget_texto2"
+                android:textSize="12dp"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/w_grafica_fila"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="14dp"
+            android:layout_marginEnd="4dp"
+            android:layout_weight="1"
+            android:contentDescription="@string/widget_grafica_cd"
+            android:scaleType="fitXY"
+            android:visibility="gone" />
+
+        <FrameLayout
+            android:id="@+id/w_hueco"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/w_botones_fila"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/w_gasto_r"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="@drawable/widget_circulo"
+                android:contentDescription="@string/widget_gasto_cd"
+                android:padding="10dp"
+                android:src="@drawable/widget_ic_menos" />
+
+            <ImageView
+                android:id="@+id/w_ingreso_r"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/widget_circulo"
+                android:contentDescription="@string/widget_ingreso_cd"
+                android:padding="10dp"
+                android:src="@drawable/widget_ic_mas" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/w_grafica"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:contentDescription="@string/widget_grafica_cd"
+        android:scaleType="fitXY"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/w_botones"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:layout_marginTop="12dp"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:id="@+id/w_gasto"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/widget_pastilla"
+            android:contentDescription="@string/widget_gasto_cd"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/widget_ic_menos" />
+
+            <TextView
+                android:id="@+id/w_gasto_t"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:fontFamily="sans-serif-medium"
+                android:includeFontPadding="false"
+                android:maxLines="1"
+                android:text="@string/widget_gasto"
+                android:textColor="@color/widget_texto"
+                android:textSize="14dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/w_ingreso"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/widget_pastilla"
+            android:contentDescription="@string/widget_ingreso_cd"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/widget_ic_mas" />
+
+            <TextView
+                android:id="@+id/w_ingreso_t"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:fontFamily="sans-serif-medium"
+                android:includeFontPadding="false"
+                android:maxLines="1"
+                android:text="@string/widget_ingreso"
+                android:textColor="@color/widget_texto"
+                android:textSize="14dp" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

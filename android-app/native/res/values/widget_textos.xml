@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="widget_completo_nombre">Mi Economía</string>
+  <string name="widget_completo_desc">Saldo, gráfica y botones para apuntar</string>
+  <string name="widget_saldo_nombre">Saldo</string>
+  <string name="widget_saldo_desc">Lo que tienes disponible</string>
+  <string name="widget_grafica_nombre">Gráfica</string>
+  <string name="widget_grafica_desc">Tu saldo en los últimos 30 días</string>
+  <string name="widget_apuntar_nombre">Apuntar</string>
+  <string name="widget_apuntar_desc">Botones de gasto e ingreso</string>
+  <string name="widget_disponible">Disponible</string>
+  <string name="widget_abre">Abre la app</string>
+  <string name="widget_30d">" · 30 días"</string>
+  <string name="widget_gasto">Gasto</string>
+  <string name="widget_ingreso">Ingreso</string>
+  <string name="widget_gasto_cd">Apuntar gasto</string>
+  <string name="widget_ingreso_cd">Apuntar ingreso</string>
+  <string name="widget_apuntar_cd">Apuntar movimiento</string>
+  <string name="widget_grafica_cd">Saldo de los últimos 30 días</string>
+  <string name="widget_muestra_saldo">1.240,50 €</string>
+  <string name="widget_muestra_cambio">+85 €</string>
+</resources>

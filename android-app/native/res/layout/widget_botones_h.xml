@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Botones Gasto e Ingreso uno al lado del otro (widget «Apuntar»). -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_fondo"
+    android:clipToOutline="true"
+    android:gravity="center"
+    android:orientation="horizontal"
+    android:padding="@dimen/widget_pad">
+
+    <LinearLayout
+        android:id="@+id/w_gasto"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@drawable/widget_pastilla"
+        android:contentDescription="@string/widget_gasto_cd"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/widget_ic_menos" />
+
+        <TextView
+            android:id="@+id/w_gasto_t"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:fontFamily="sans-serif-medium"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:text="@string/widget_gasto"
+            android:textColor="@color/widget_texto"
+            android:textSize="14dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/w_ingreso"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_marginStart="8dp"
+        android:layout_weight="1"
+        android:background="@drawable/widget_pastilla"
+        android:contentDescription="@string/widget_ingreso_cd"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/widget_ic_mas" />
+
+        <TextView
+            android:id="@+id/w_ingreso_t"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:fontFamily="sans-serif-medium"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:text="@string/widget_ingreso"
+            android:textColor="@color/widget_texto"
+            android:textSize="14dp" />
+    </LinearLayout>
+</LinearLayout>

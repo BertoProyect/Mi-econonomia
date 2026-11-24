@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Colores de los widgets. Para cambiar el acento basta con tocar widget_acento. -->
+<resources>
+  <color name="widget_fondo">#16181A</color>
+  <color name="widget_boton">#25282C</color>
+  <color name="widget_texto">#FFFFFF</color>
+  <color name="widget_texto2">#9EFFFFFF</color>
+  <color name="widget_texto3">#6BFFFFFF</color>
+  <color name="widget_acento">#9195FF</color>
+  <color name="widget_positivo">#1FC795</color>
+  <color name="widget_negativo">#FF5F6D</color>
+  <color name="widget_tinta">#000000</color>
+</resources>

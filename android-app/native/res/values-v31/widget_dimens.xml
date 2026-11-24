@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 12+: las esquinas del widget son las del sistema. -->
+<resources>
+  <dimen name="widget_radio">@android:dimen/system_app_widget_background_radius</dimen>
+  <dimen name="widget_pad">14dp</dimen>
+</resources>

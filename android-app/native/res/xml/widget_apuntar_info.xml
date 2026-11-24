@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Widget redimensionable en ambos sentidos, desde 1×1 hasta lo que permita el lanzador. -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/widget_apuntar_desc"
+    android:initialLayout="@layout/widget_cargando"
+    android:minWidth="180dp"
+    android:minHeight="40dp"
+    android:minResizeWidth="40dp"
+    android:minResizeHeight="40dp"
+    android:previewImage="@drawable/widget_vista_apuntar"
+    android:previewLayout="@layout/widget_prev_apuntar"
+    android:resizeMode="horizontal|vertical"
+    android:targetCellWidth="3"
+    android:targetCellHeight="1"
+    android:updatePeriodMillis="0"
+    android:widgetCategory="home_screen" />

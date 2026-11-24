@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Gráfica de ejemplo para la vista previa del selector de widgets. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="300dp" android:height="100dp" android:viewportWidth="300" android:viewportHeight="100">
+  <path android:fillColor="@color/widget_acento" android:fillAlpha="0.12" android:pathData="M2,74 C22,73 38,64 58,65 C78,66 92,54 112,52 C132,50 146,58 166,54 C186,50 200,37 220,35 C240,33 256,40 274,28 C284,22 292,20 298,19 L298,100 L2,100 Z" />
+  <path android:fillColor="#00000000" android:strokeColor="@color/widget_acento" android:strokeWidth="2.6" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M2,74 C22,73 38,64 58,65 C78,66 92,54 112,52 C132,50 146,58 166,54 C186,50 200,37 220,35 C240,33 256,40 274,28 C284,22 292,20 298,19" />
+</vector>

@@ -16,10 +16,18 @@ for d in android/app/src/main/res/mipmap-*; do
 done
 sed -i 's/#FFFFFF/#000000/I' android/app/src/main/res/values/ic_launcher_background.xml || true
 PKG=android/app/src/main/java/com/bertoproject/mieconomia
-mkdir -p "$PKG" android/app/src/main/res/drawable android/app/src/main/res/values
+RES=android/app/src/main/res
+mkdir -p "$PKG"
+# Código nativo (incluye un MainActivity propio que sustituye al generado por Capacitor)
 for f in native/*.java; do sed -e "s#__APP_URL__#${APP_URL}#g" -e "s#__VERSION__#${VERSION}#g" "$f" > "$PKG/$(basename "$f")"; done
-cp native/res/drawable/*.xml android/app/src/main/res/drawable/
-cp native/res/values/*.xml android/app/src/main/res/values/
+# Recursos: layout/, xml/, drawable/, drawable-nodpi/, values/, values-v31/...
+for d in native/res/*/; do
+  n=$(basename "$d")
+  mkdir -p "$RES/$n"
+  cp "$d"* "$RES/$n/"
+done
+echo "Nativo: $(ls native/*.java | wc -l) clases Java, $(find native/res -type f | wc -l) recursos"
+ls "$PKG" "$RES/layout" "$RES/xml"
 node patch-android.js
 sed -i -E "s/versionCode [0-9]+/versionCode ${VERSION}/; s/versionName \"[^\"]*\"/versionName \"1.${VERSION}\"/" android/app/build.gradle
 grep -E "versionCode|versionName" android/app/build.gradle
