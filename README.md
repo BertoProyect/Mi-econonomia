@@ -41,10 +41,10 @@ android-app/ + .github/workflows/android-apk.yml   APK opcional
 - Sin red no guarda movimientos nuevos (avisa con una barra arriba).
 - El análisis con Claude solo existe en la versión de Claude.
 
-## Publicar en Cloudflare Pages (dinero.bertoproject.com)
+## Publicar en Cloudflare Pages (mieconomia.bertoproject.com)
 1. Cloudflare → Workers y Pages → Crear → Pages → Conectar a Git → `Mi-econonomia`. Sin comando de build ni directorio de salida.
-2. En el proyecto: Dominios personalizados → `dinero.bertoproject.com`.
-3. Supabase → Autenticación → Configuración de URL: pon `https://dinero.bertoproject.com` como URL del sitio y en las de redirección.
+2. En el proyecto: Dominios personalizados → `mieconomia.bertoproject.com`.
+3. Supabase → Autenticación → Configuración de URL: pon `https://mieconomia.bertoproject.com` como URL del sitio y en las de redirección.
 La app no se indexa en Google (`noindex` en la página y cabecera `X-Robots-Tag` en `_headers`), así que no afecta al SEO de bertoproject.com.
 
 ## Leer capturas con IA (Gemini)

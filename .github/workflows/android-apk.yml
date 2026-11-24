@@ -20,7 +20,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      APP_URL: ${{ vars.APP_URL || 'https://dinero.bertoproject.com' }}
+      APP_URL: ${{ vars.APP_URL || 'https://mieconomia.bertoproject.com' }}
       VERSION: ${{ github.run_number }}
       KS_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
       KS_PASS: ${{ secrets.ANDROID_KS_PASS }}
